@@ -2,10 +2,9 @@ require 'rubygems'
 require 'bundler/setup'
 require 'awesome_print'
 
-require 'ruby-mws' # and any other gems you need
+require 'ruby-mws'
 
 RSpec.configure do |config|
-  # some (optional) config here
   def options
     {
       :access_key => 'access',
