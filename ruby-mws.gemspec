@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.email       = ["elyngved@gmail.com"]
   s.homepage    = ""
   s.summary     = %q{RubyMWS Gem}
-  s.description = %q{This gem serves as a wrapper for Amazon.com's Marketplace Web Service (MWS) gem.}
+  s.description = %q{Under development!! This gem will serve as a wrapper for Amazon.com's Marketplace Web Service (MWS) API.}
 
   s.rubyforge_project = "ruby-mws"
 

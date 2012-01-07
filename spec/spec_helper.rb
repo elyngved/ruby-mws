@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'bundler/setup'
+require 'awesome_print'
 
 require 'ruby-mws' # and any other gems you need
 
