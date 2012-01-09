@@ -5,6 +5,7 @@ gemspec
 
 gem 'httparty'
 gem 'nokogiri'
+gem 'ruby-hmac'
 
 gem 'rspec'
 gem 'awesome_print'

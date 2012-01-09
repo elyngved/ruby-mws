@@ -1,18 +1,22 @@
 module MWS
 
   class Base
-    include HTTParty
-    base_uri "https://mws.amazonservices.com"
-
+    
     attr_accessor :connection
 
     def initialize(options={})
       @connection = MWS::Connection.new(options)
     end
 
-    def self.get_server_time
-      response = get("/")
-      Time.parse(response['PingResponse']['Timestamp']['timestamp'])
+    def orders
+      @orders ||= MWS::API::Order.new(@connection)
     end
+
+
+    # serves as a server ping
+    def self.server_time
+      MWS::Connection.server_time
+    end
+
   end
 end
