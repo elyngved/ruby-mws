@@ -8,10 +8,10 @@ describe MWS::Base do
 
   context 'initialize' do
     it "should create a connection object" do
-      mws = MWS::Base.new(options)
+      mws = MWS::Base.new(auth_params)
       mws.should be
       mws.connection.should be
-      mws.connection.access_key.should == 'access'
+      mws.connection.class.should == MWS::Connection
     end
   end
 

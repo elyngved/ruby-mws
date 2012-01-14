@@ -17,7 +17,7 @@ module MWS
     end
 
     def public_attrs
-      [:aws_access_key_id, :seller_id, :marketplace, :host]
+      [:aws_access_key_id, :seller_id, :marketplace_id, :host]
     end
 
     def private_attrs

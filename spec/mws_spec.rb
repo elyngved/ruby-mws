@@ -4,7 +4,7 @@ describe MWS do
 
   context 'connect' do
     it 'should create a MWS::Base object' do
-      MWS.connect(options).class.should == MWS::Base
+      MWS.connect(auth_params).class.should == MWS::Base
     end
   end
 
