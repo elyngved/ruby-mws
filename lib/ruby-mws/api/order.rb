@@ -3,7 +3,7 @@ module MWS
 
     class Order < Base
 
-      def_request [:list_orders, :list_orders_by_next_token, :get_order,
+      def_request [:list_orders, :list_orders_by_next_token,
                    :list_order_items, :list_order_items_by_next_token],
         :verb => :get,
         :uri => '/Orders/2011-01-01',
