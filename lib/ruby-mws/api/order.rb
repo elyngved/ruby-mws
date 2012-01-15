@@ -3,11 +3,11 @@ module MWS
 
     class Order < Base
 
-      def_request :list_orders,
+      def_request [:list_orders, :list_orders_by_next_token, :get_order,
+                   :list_order_items, :list_order_items_by_next_token],
         :verb => :get,
         :uri => '/Orders/2011-01-01',
-        :version => '2011-01-01',
-        :return => lambda { |res| res.list_orders_response.list_orders_result.orders.order }
+        :version => '2011-01-01'
 
     end
 

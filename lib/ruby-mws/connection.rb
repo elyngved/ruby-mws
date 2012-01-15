@@ -3,7 +3,6 @@ module MWS
   class Connection
 
     DEFAULT_HOST = "mws.amazonservices.com"
-    # attr_reader :host
 
     def initialize(options={})
       attrs.each do |a|
