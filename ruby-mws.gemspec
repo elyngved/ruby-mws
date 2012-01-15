@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
 
   # specify any dependencies here; for example:
   s.add_development_dependency "rspec"
-  s.add_development_dependency "vcr"
+  s.add_development_dependency "ephemeral_response"
 
   s.add_runtime_dependency "httparty"
   s.add_runtime_dependency "nokogiri"

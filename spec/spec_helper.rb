@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'bundler/setup'
 require 'awesome_print'
+require 'ephemeral_response'
 
 require 'ruby-mws'
 

@@ -52,12 +52,12 @@ module MWS
         params[:lists][:marketplace_id] = "MarketplaceId.Id"
 
         query = Query.new params
-        response = Response.new self.class.send(params[:verb], query.request_uri)
+        @response = Response.new self.class.send(params[:verb], query.request_uri)
         # params[:return] ? params[:return].call(@response) : @response
         begin
-          response.send("#{name}_response").send("#{name}_result")
+          @response.send("#{name}_response").send("#{name}_result")
         rescue NoMethodError
-          response
+          @response
         end
       end
 

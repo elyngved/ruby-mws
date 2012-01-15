@@ -1,0 +1,51 @@
+--- !ruby/object:EphemeralResponse::Fixture
+uri: !ruby/object:URI::HTTPS
+  scheme: https
+  user: 
+  password: 
+  host: mws.amazonservices.com
+  port: 443
+  path: /Orders/2011-01-01
+  query: AWSAccessKeyId=AKIAIFKDIN4IUO4WZHHA&Action=ListOrderItems&AmazonOrderId=102-4850183-7065809&MarketplaceId.Id.1=ATVPDKIKX0DER&SellerId=A27WNMSA8OPBXY&Signature=RJPnL6udYEGeYycYk7r%2FurSkdGrLn6oewp8Y0OJyWlE%3D&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2012-01-15T17%3A20%3A14-05%3A00&Version=2011-01-01
+  opaque: 
+  registry: 
+  fragment: 
+  parser: 
+request: !ruby/object:Net::HTTP::Get
+  method: GET
+  request_has_body: false
+  response_has_body: true
+  path: /Orders/2011-01-01?AWSAccessKeyId=AKIAIFKDIN4IUO4WZHHA&Action=ListOrderItems&AmazonOrderId=102-4850183-7065809&MarketplaceId.Id.1=ATVPDKIKX0DER&SellerId=A27WNMSA8OPBXY&Signature=RJPnL6udYEGeYycYk7r%2FurSkdGrLn6oewp8Y0OJyWlE%3D&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2012-01-15T17%3A20%3A14-05%3A00&Version=2011-01-01
+  header:
+    user-agent:
+    - ruby-mws/0.0.1 (Language=Ruby/1.9.3-p0)
+    content-type:
+    - text/xml
+  body: 
+  body_stream: 
+  body_data: 
+created_at: 2012-01-15 17:20:26.679813000 -05:00
+response: !ruby/object:Net::HTTPOK
+  http_version: '1.1'
+  code: '200'
+  message: OK
+  header:
+    date:
+    - Sun, 15 Jan 2012 22:20:27 GMT
+    server:
+    - Server
+    content-type:
+    - text/xml
+    vary:
+    - Accept-Encoding,User-Agent
+    transfer-encoding:
+    - chunked
+  body: ! '<?xml version="1.0"?>
+
+    <ListOrderItemsResponse xmlns="https://mws.amazonservices.com/Orders/2011-01-01"><ListOrderItemsResult><AmazonOrderId>102-4850183-7065809</AmazonOrderId><OrderItems><OrderItem><ASIN>B005V0ZANG</ASIN><OrderItemId>00698576333794</OrderItemId><SellerSKU>E6-0P7X-WKJU</SellerSKU><Title>Cuissential
+    Original 20 Pc. Push-up Pop Container Set</Title><QuantityOrdered>1</QuantityOrdered><QuantityShipped>1</QuantityShipped><ItemPrice><CurrencyCode>USD</CurrencyCode><Amount>25.00</Amount></ItemPrice><ItemTax><CurrencyCode>USD</CurrencyCode><Amount>0.00</Amount></ItemTax><ShippingPrice><CurrencyCode>USD</CurrencyCode><Amount>6.76</Amount></ShippingPrice><ShippingTax><CurrencyCode>USD</CurrencyCode><Amount>0.00</Amount></ShippingTax><ShippingDiscount><CurrencyCode>USD</CurrencyCode><Amount>6.76</Amount></ShippingDiscount><PromotionDiscount><CurrencyCode>USD</CurrencyCode><Amount>0.00</Amount></PromotionDiscount><PromotionIds><PromotionId>SSOF
+    SSS-25</PromotionId></PromotionIds></OrderItem></OrderItems></ListOrderItemsResult><ResponseMetadata><RequestId>1fcf24ad-706b-4c55-91ba-3a79dba8e6f8</RequestId></ResponseMetadata></ListOrderItemsResponse>'
+  read: true
+  socket: 
+  body_exist: true
+file_name: mws.amazonservices.com_GET_Orders-2011-01-01_9799555.yml

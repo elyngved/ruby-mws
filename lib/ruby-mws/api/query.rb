@@ -36,8 +36,17 @@ module MWS
         # TODO: Allow for multiple marketplace ids
         params = Hash[params.map{|k,v| [k.camelize.sub(/Aws/,'AWS'), v]}]
 
-        params = params.sort.map! { |p| "#{p[0]}=#{escape(p[1])}" }
+        params = params.sort.map! { |p| "#{p[0]}=#{process_param(p[1])}" }
         params.join('&')
+      end
+
+      def process_param(param)
+        case param
+        when Time, DateTime
+          escape(param.iso8601)
+        else
+          escape(param.to_s)
+        end
       end
 
       def escape(value)

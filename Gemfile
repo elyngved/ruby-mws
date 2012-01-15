@@ -10,5 +10,5 @@ gem 'hashie'
 gem 'rash'
 
 gem 'rspec'
-gem 'vcr'
+gem 'ephemeral_response'
 gem 'awesome_print'

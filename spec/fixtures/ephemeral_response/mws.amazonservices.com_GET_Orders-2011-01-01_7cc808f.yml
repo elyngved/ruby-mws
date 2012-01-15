@@ -1,0 +1,54 @@
+--- !ruby/object:EphemeralResponse::Fixture
+uri: !ruby/object:URI::HTTPS
+  scheme: https
+  user: 
+  password: 
+  host: mws.amazonservices.com
+  port: 443
+  path: /Orders/2011-01-01
+  query: AWSAccessKeyId=AKIAIFKDIN4IUO4WZHHA&Action=GetOrder&AmazonOrderId.Id.1=102-4850183-7065809&AmazonOrderId.Id.2=002-3400187-5292203&MarketplaceId.Id.1=ATVPDKIKX0DER&SellerId=A27WNMSA8OPBXY&Signature=nPbAmPvF0HDRvqMo25SRklYi3IzdGYqXTXuNyTQOoPY%3D&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2012-01-15T17%3A13%3A41-05%3A00&Version=2011-01-01
+  opaque: 
+  registry: 
+  fragment: 
+  parser: 
+request: !ruby/object:Net::HTTP::Get
+  method: GET
+  request_has_body: false
+  response_has_body: true
+  path: /Orders/2011-01-01?AWSAccessKeyId=AKIAIFKDIN4IUO4WZHHA&Action=GetOrder&AmazonOrderId.Id.1=102-4850183-7065809&AmazonOrderId.Id.2=002-3400187-5292203&MarketplaceId.Id.1=ATVPDKIKX0DER&SellerId=A27WNMSA8OPBXY&Signature=nPbAmPvF0HDRvqMo25SRklYi3IzdGYqXTXuNyTQOoPY%3D&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2012-01-15T17%3A13%3A41-05%3A00&Version=2011-01-01
+  header:
+    user-agent:
+    - ruby-mws/0.0.1 (Language=Ruby/1.9.3-p0)
+    content-type:
+    - text/xml
+  body: 
+  body_stream: 
+  body_data: 
+created_at: 2012-01-15 17:14:12.086745000 -05:00
+response: !ruby/object:Net::HTTPOK
+  http_version: '1.1'
+  code: '200'
+  message: OK
+  header:
+    date:
+    - Sun, 15 Jan 2012 22:14:12 GMT
+    server:
+    - Server
+    content-type:
+    - text/xml
+    vary:
+    - Accept-Encoding,User-Agent
+    transfer-encoding:
+    - chunked
+  body: ! '<?xml version="1.0"?>
+
+    <GetOrderResponse xmlns="https://mws.amazonservices.com/Orders/2011-01-01"><GetOrderResult><Orders><Order><AmazonOrderId>102-4850183-7065809</AmazonOrderId><PurchaseDate>2012-01-15T03:44:05.000Z</PurchaseDate><LastUpdateDate>2012-01-15T17:35:00.000Z</LastUpdateDate><OrderStatus>Shipped</OrderStatus><SellerOrderId>102-4850183-7065809</SellerOrderId><SalesChannel>Amazon.com</SalesChannel><ShipServiceLevel>Standard</ShipServiceLevel><FulfillmentChannel>AFN</FulfillmentChannel><OrderTotal><CurrencyCode>USD</CurrencyCode><Amount>25.00</Amount></OrderTotal><ShippingAddress><Name>June
+    Holly</Name><AddressLine1>1764 OATES DR</AddressLine1><City>MESQUITE</City><StateOrRegion>TX</StateOrRegion><PostalCode>75150-1350</PostalCode><CountryCode>US</CountryCode><Phone>4696935544</Phone></ShippingAddress><NumberOfItemsShipped>1</NumberOfItemsShipped><NumberOfItemsUnshipped>0</NumberOfItemsUnshipped><PaymentMethod>Other</PaymentMethod><MarketplaceId>ATVPDKIKX0DER</MarketplaceId><BuyerEmail>xc7krdg16hrtv6l@marketplace.amazon.com</BuyerEmail><BuyerName>June
+    Holly</BuyerName><ShipmentServiceLevelCategory>Standard</ShipmentServiceLevelCategory></Order><Order><AmazonOrderId>002-3400187-5292203</AmazonOrderId><PurchaseDate>2012-01-11T02:33:47.000Z</PurchaseDate><LastUpdateDate>2012-01-15T17:36:46.000Z</LastUpdateDate><OrderStatus>Shipped</OrderStatus><SellerOrderId>002-3400187-5292203</SellerOrderId><SalesChannel>Amazon.com</SalesChannel><ShipServiceLevel>Standard</ShipServiceLevel><FulfillmentChannel>AFN</FulfillmentChannel><OrderTotal><CurrencyCode>USD</CurrencyCode><Amount>14.50</Amount></OrderTotal><ShippingAddress><Name>Jamie
+    Jenson</Name><AddressLine1>PMB 218</AddressLine1><AddressLine2>855 Trosper Rd
+    SW #108</AddressLine2><City>Tumwater</City><StateOrRegion>Washington</StateOrRegion><PostalCode>98512</PostalCode><CountryCode>US</CountryCode><Phone>360-943-6126</Phone></ShippingAddress><NumberOfItemsShipped>1</NumberOfItemsShipped><NumberOfItemsUnshipped>0</NumberOfItemsUnshipped><PaymentMethod>Other</PaymentMethod><MarketplaceId>ATVPDKIKX0DER</MarketplaceId><BuyerEmail>1blbkc0733hzlm1@marketplace.amazon.com</BuyerEmail><BuyerName>Jamie
+    Jenson</BuyerName><ShipmentServiceLevelCategory>Standard</ShipmentServiceLevelCategory></Order></Orders></GetOrderResult><ResponseMetadata><RequestId>c59d11c7-15bb-44a8-9841-7c270bbc6cfe</RequestId></ResponseMetadata></GetOrderResponse>'
+  read: true
+  socket: 
+  body_exist: true
+file_name: mws.amazonservices.com_GET_Orders-2011-01-01_7cc808f.yml

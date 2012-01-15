@@ -8,7 +8,7 @@ require 'hashie'
 require 'rash'
 
 module MWS
-  def self.connect(options={})
+  def self.new(options={})
     MWS::Base.new(options.symbolize_keys!)
   end
 end
