@@ -9,6 +9,13 @@ module MWS
         :uri => '/Orders/2011-01-01',
         :version => '2011-01-01'
 
+      def_request :get_order,
+        :verb => :get,
+        :uri => '/Orders/2011-01-01',
+        :version => '2011-01-01',
+        :lists => {
+          :amazon_order_id => "AmazonOrderId.Id"
+        }
     end
 
   end

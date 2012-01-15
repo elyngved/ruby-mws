@@ -5,6 +5,11 @@ module MWS
 
       def initialize(params)
         @params = params
+        params[:lists].each do |field,label|
+          [params.delete(field)].compact.flatten.each_with_index do |item,i|
+            params["#{label}.#{i+1}"] = item
+          end
+        end unless params[:lists].nil?
       end
 
       def canonical
@@ -29,7 +34,7 @@ module MWS
 
         # hack to capitalize AWS in param names
         # TODO: Allow for multiple marketplace ids
-        params = Hash[params.map{|k,v| [k.camelize.sub(/Aws/,'AWS').sub(/MarketplaceId/, "MarketplaceId.Id.1"), v]}]
+        params = Hash[params.map{|k,v| [k.camelize.sub(/Aws/,'AWS'), v]}]
 
         params = params.sort.map! { |p| "#{p[0]}=#{escape(p[1])}" }
         params.join('&')
@@ -47,7 +52,8 @@ module MWS
           :host,
           :uri,
           :secret_access_key,
-          :return
+          :return,
+          :lists
         ]
       end
 

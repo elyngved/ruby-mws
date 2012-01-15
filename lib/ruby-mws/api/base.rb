@@ -30,6 +30,11 @@ module MWS
           }
         end
       end
+
+      def self.add_list(requests, param, label)
+        [requests].flatten.each do |name|
+          self.class_variable_set("@@#{name}_options", options.first)
+        end
       end
 
       def send_request(name, params, options)
@@ -43,9 +48,21 @@ module MWS
         params[:timestamp]         ||= Time.now.iso8601
         params[:version]           ||= '2009-01-01'
 
+        params[:lists] ||= {}
+        params[:lists][:marketplace_id] = "MarketplaceId.Id"
+
         query = Query.new params
-        @response = Response.new self.class.send(params[:verb], query.request_uri)
-        params[:return] ? params[:return].call(@response) : @response
+        response = Response.new self.class.send(params[:verb], query.request_uri)
+        # params[:return] ? params[:return].call(@response) : @response
+        begin
+          response.send("#{name}_response").send("#{name}_result")
+        rescue NoMethodError
+          response
+        end
+      end
+
+      def inspect
+        "#<#{self.class.to_s}:#{object_id}>"
       end
 
     end
