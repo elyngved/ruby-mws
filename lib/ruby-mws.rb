@@ -52,6 +52,7 @@ require 'ruby-mws/exceptions'
 require 'ruby-mws/version'
 
 require 'ruby-mws/api/base'
+require 'ruby-mws/api/inventory'
 require 'ruby-mws/api/order'
 require 'ruby-mws/api/query'
 require 'ruby-mws/api/response'
