@@ -9,7 +9,10 @@ module MWS
         :version => '2010-10-01',
         :lists => {
           :seller_skus => "SellerSkus.member"
-        }
+        },
+        :mods => [
+          lambda {|r| r.inventory_supply_list = [r.inventory_supply_list.member].flatten}
+        ]
 
     end
 

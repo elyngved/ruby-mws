@@ -54,6 +54,7 @@ module MWS
           if @next[:token] = res.next_token  # modifying, not comparing
             @next[:action] = params[:next_action] || (name.match(/_by_next_token/) ? name : "#{name}_by_next_token")
           end
+          params[:mods].each {|mod| mod.call(res) } if params[:mods]
           res
         rescue NoMethodError
           @response

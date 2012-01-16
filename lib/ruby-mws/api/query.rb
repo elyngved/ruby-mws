@@ -62,7 +62,8 @@ module MWS
           :uri,
           :secret_access_key,
           :return,
-          :lists
+          :lists,
+          :mods
         ]
       end
 
