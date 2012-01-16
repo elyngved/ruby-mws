@@ -6,4 +6,7 @@ module MWS
   class MissingConnectionOptions < MWSException
   end
 
+  class NoNextToken < MWSException
+  end
+
 end

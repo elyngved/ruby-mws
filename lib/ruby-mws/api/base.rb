@@ -16,6 +16,7 @@ module MWS
       def initialize(connection)
         @connection = connection
         @saved_options = {}
+        @next = {}
         self.class.base_uri "https://#{connection.host}"
       end
 
@@ -28,12 +29,6 @@ module MWS
               send_request(:#{name}, params, @@#{name}_options)
             end
           }
-        end
-      end
-
-      def self.add_list(requests, param, label)
-        [requests].flatten.each do |name|
-          self.class_variable_set("@@#{name}_options", options.first)
         end
       end
 
@@ -53,12 +48,25 @@ module MWS
 
         query = Query.new params
         @response = Response.new self.class.send(params[:verb], query.request_uri)
-        # params[:return] ? params[:return].call(@response) : @response
+
         begin
-          @response.send("#{name}_response").send("#{name}_result")
+          res = @response.send("#{name}_response").send("#{name}_result")
+          if @next[:token] = res.next_token  # modifying, not comparing
+            @next[:action] = params[:next_action] || (name.match(/_by_next_token/) ? name : "#{name}_by_next_token")
+          end
+          res
         rescue NoMethodError
           @response
         end
+      end
+
+      def has_next?
+        not @next[:token].nil?
+      end
+      alias :has_next :has_next?
+
+      def next
+        self.send(@next[:action], :next_token => @next[:token]) unless @next[:token].nil?
       end
 
       def inspect

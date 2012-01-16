@@ -10,6 +10,10 @@ RSpec.configure do |config|
     File.open(File.join(File.expand_path(File.dirname(__FILE__)), 'fixtures', path)).read
   end
 
+  def mws_object
+    @mws_object ||= MWS.new(auth_params)
+  end
+
   def auth_params
     @auth_params ||=
       begin
@@ -24,4 +28,7 @@ RSpec.configure do |config|
         }
       end
   end
+end
+
+class TestWorksError < StandardError
 end
