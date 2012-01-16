@@ -5,16 +5,16 @@ describe MWS::API::Order do
   before :all do
     EphemeralResponse.activate
     @mws = MWS.new(auth_params)
-    @timestamp = "2012-01-15T17:28:17-05:00"
+    @timestamp = "2012-01-16T18:49:22-05:00"
   end
 
   context "requests" do
     describe "list_orders" do
-      it "should receive a list_orders_result" do
+      it "should receive a list of orders" do
         orders = @mws.orders.list_orders :last_updated_after => "2012-01-15T13:07:26-05:00" ,
           :timestamp => @timestamp
         orders.orders.should be_an_instance_of Array
-        orders.should == @mws.orders.response.list_orders_response.list_orders_result
+        orders.orders.first.should have_key :amazon_order_id
       end
     end
 
@@ -23,6 +23,7 @@ describe MWS::API::Order do
         orders = @mws.orders.list_orders_by_next_token :timestamp => @timestamp,
           :next_token => "zwR7fTkqiKp/YYuZQbKv1QafEPREmauvizt1MIhPYZZl3LSdPSOgN1byEfyVqilNBpcRD1uxgRxTg2dsYWmzKd8ytOVgN7d/KyNtf5fepe2OEd7gVZif6X81/KsTyqd1e64rGQd1TyCS68vI7Bqws+weLxD7b1CVZciW6QBe7o2FizcdzSXGSiKsUkM4/6QGllhc4XvGqg5e0zIeaOVNezxWEXvdeDL7eReo//Hc3LMRF18hF5ZYNntoCB8irbDGcVkxA+q0fZYwE7+t4NjazyEZY027dXAVTSGshRBy6ZTthhfBGj6Dwur8WCwcU8Vc25news0zC1w6gK1h3EdXw7a3u+Q12Uw9ZROnI57RGr4CrtRODNGKSRdGvNrxcHpI2aLZKrJa2MgKRa+KsojCckrDiHqb8mBEJ88g6izJN42dQcLTGQRwBej+BBOOHYP4"
         orders.orders.should be_an_instance_of Array
+        orders.orders.first.should have_key :amazon_order_id
       end
     end
 
@@ -40,6 +41,7 @@ describe MWS::API::Order do
           :timestamp => @timestamp
         orders.orders.should be_an_instance_of Array
         orders.orders.size.should == 2
+        orders.orders.first.should have_key :amazon_order_id
       end
     end
 

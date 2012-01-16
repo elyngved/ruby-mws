@@ -47,18 +47,11 @@ module MWS
         params[:lists][:marketplace_id] = "MarketplaceId.Id"
 
         query = Query.new params
-        @response = Response.new self.class.send(params[:verb], query.request_uri)
-
-        begin
-          res = @response.send("#{name}_response").send("#{name}_result")
-          if @next[:token] = res.next_token  # modifying, not comparing
-            @next[:action] = params[:next_action] || (name.match(/_by_next_token/) ? name : "#{name}_by_next_token")
-          end
-          params[:mods].each {|mod| mod.call(res) } if params[:mods]
-          res
-        rescue NoMethodError
-          @response
+        @response = Response.parse self.class.send(params[:verb], query.request_uri), name, params
+        if @response.respond_to?(:next_token) and @next[:token] = @response.next_token  # modifying, not comparing
+          @next[:action] = name.match(/_by_next_token/) ? name : "#{name}_by_next_token"
         end
+        @response
       end
 
       def has_next?

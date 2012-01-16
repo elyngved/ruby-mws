@@ -9,4 +9,6 @@ module MWS
   class NoNextToken < MWSException
   end
 
+  class BadResponseError < MWSException
+  end
 end

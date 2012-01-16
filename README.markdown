@@ -1,10 +1,12 @@
 ruby-mws
 ========
 
-Under development
------------------
+by Erik Lyngved
 
-This is a Ruby gem that wraps the Amazon Marketplace Web Service (MWS) API. It is still missing many features, but some basic requests are available.
+Under development!
+------------------
+
+ruby-mws is a Ruby gem that wraps the Amazon Marketplace Web Service (MWS) API. It is still missing many features, but some basic requests are available.
 
 Please use at your own risk. This has not been tested thoroughly and is not guaranteed to work in any capacity. See the LICENSE file for more details.
 
