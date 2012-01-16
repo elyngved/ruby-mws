@@ -46,17 +46,22 @@ Use `keys` and `has_key?` to discover what's in the response.
     response.keys   # => ["last_updated_before", "orders"]
     response.has_key? :last_updated_before   # => true
 
-### next
+### NextToken requests
 
-For responses with long lists of info, results are returned from the service in pages (usually 100 to a page). If a response has a next page, calling `next` on the same API instance will make a request for the next page. You cam keep calling `next` as long as `has_next?` returns true.
+For responses with long lists of data, results are returned from the service in pages (usually 100 per page). Example:
 
     response = mws.orders.list_orders :last_updated_after => Time.now-1.week   # returns 100 orders
 
+Here, there are more orders to be returned. You can call `has_next?` on the same API instance to see if the last response returned has a next page. If so, calling `next` will make the request for the next page.
+
     mws.orders.has_next?   # => true
     next_response = mws.orders.next   # returns next page of orders
-    
-    mws.orders.has_next?   # => false
-    mws.orders.next        # => nil
+
+You can keep calling `next` on the API instance as long as `has_next?` returns true.
+
+You can always go about the manual way as per Amazon's docs:
+
+    next_response = mws.orders.list_orders_by_next_response :next_token => response.next_token
 
 ### Underscore notation
 
