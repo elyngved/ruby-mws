@@ -65,32 +65,34 @@ You can always go about the manual way as per Amazon's docs:
 
 ### Underscore notation
 
-ruby-mws wraps Amazon's CamelCase convention with Ruby-friendly underscore notation. If you are following along with Amazon's MWS Developer Docs, all field names translate
+ruby-mws wraps Amazon's CamelCase convention with Ruby-friendly underscore notation. This goes for request names and params, as well as response field names.
 
 Available Requests
 ------------------
 
     @mws = MWS.new(authentication_hash)   # initialize the connection object
 
+This object can be used to access all API services. Below are examples on how to make the different requests that are available so far. Refer to the [Amazon MWS Reference Docs](https://developer.amazonservices.com/) for available fields for each request.
+
 ### Orders API
 
-* list_orders - gets orders by time frame and other parameters
+* ListOrders - gets orders by time frame and other parameters
 
     `@mws.orders.list_orders :last_updated_after => Time.now-4.hours`
 
-* get_order - gets orders by Amazon order ID
+* GetOrder - gets orders by Amazon order ID
 
     `@mws.orders.get_order :amazon_order_id => "002-EXAMPLE-0031387"`
 
     `:amazon_order_id` can be an array to retrieve multiple orders.
 
-* list_order_items - gets order items for one order ID
+* ListOrderItems - gets order items for one order ID
 
     `@mws.orders.list_order_items :amazon_order_id => "002-EXAMPLE-0031387"`
 
 ### Fulfillment Inventory API
 
-* list_inventory_supply - returns availability of inventory, only returns items based on list of SKUs or last change date
+* ListInventorySupply - returns availability of inventory, only returns items based on list of SKUs or last change date
 
   `@mws.inventory.list_inventory_supply :seller_skus => %w[PF-5VZN-04XR V4-03EY-LAL1 OC-TUKC-031P`
   `@mws.inventory.list_inventory_supply :query_start_date_time => Time.now-1.day`
