@@ -94,5 +94,5 @@ This object can be used to access all API services. Below are examples on how to
 
 * ListInventorySupply - returns availability of inventory, only returns items based on list of SKUs or last change date
 
-  `@mws.inventory.list_inventory_supply :seller_skus => %w[PF-5VZN-04XR V4-03EY-LAL1 OC-TUKC-031P`
-  `@mws.inventory.list_inventory_supply :query_start_date_time => Time.now-1.day`
+    `@mws.inventory.list_inventory_supply :seller_skus => %w[PF-5VZN-04XR V4-03EY-LAL1 OC-TUKC-031P`
+    `@mws.inventory.list_inventory_supply :query_start_date_time => Time.now-1.day`
