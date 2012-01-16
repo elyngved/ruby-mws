@@ -7,9 +7,9 @@ Gem::Specification.new do |s|
   s.version     = MWS::VERSION
   s.authors     = ["Erik Lyngved"]
   s.email       = ["elyngved@gmail.com"]
-  s.homepage    = ""
+  s.homepage    = "http://github.com/elyngved/ruby-mws"
   s.summary     = %q{RubyMWS Gem}
-  s.description = %q{Under development!! This gem will serve as a wrapper for Amazon.com's Marketplace Web Service (MWS) API.}
+  s.description = %q{(Under development) This gem serves as a wrapper for Amazon.com's Marketplace Web Service (MWS) API. Visit http://github.com/elyngved/ruby-mws for documentation.}
 
   s.rubyforge_project = "ruby-mws"
 
