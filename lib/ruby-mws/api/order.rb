@@ -6,6 +6,9 @@ module MWS
         :verb => :get,
         :uri => '/Orders/2011-01-01',
         :version => '2011-01-01',
+        :lists => {
+          :order_status => "OrderStatus.Status"
+        },
         :mods => [
           lambda {|r| r.orders = r.orders.order}
         ]
