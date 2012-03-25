@@ -63,7 +63,7 @@ You can keep calling `next` on the API instance as long as `has_next?` returns t
 
 You can always go about the manual way as per Amazon's docs:
 
-    next_response = mws.orders.list_orders_by_next_response :next_token => response.next_token
+    next_response = mws.orders.list_orders_by_next_token :next_token => response.next_token
 
 ### Underscore notation
 
