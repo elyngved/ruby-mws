@@ -14,12 +14,12 @@ RSpec.configure do |config|
     @mws_object ||= MWS.new(auth_params)
   end
 
+  # To test, create spec/credentials.yml or fill in below
   def auth_params
     @auth_params ||=
       begin
         hsh = YAML.load(File.open(File.join(File.expand_path(File.dirname(__FILE__)), 'credentials.yml'))).symbolize_keys!
       rescue
-        # some fake auth values
         {
           :aws_access_key_id  => 'access',
           :secret_access_key  => 'super_secret',
