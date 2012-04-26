@@ -5,3 +5,4 @@ pkg/*
 .DS_Store
 spec/credentials.yml
 spec/fixtures/ephemeral_response/*
+.rvmrc
