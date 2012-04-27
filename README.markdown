@@ -6,7 +6,7 @@ by Erik Lyngved
 Under development!
 ------------------
 
-ruby-mws is a Ruby gem that wraps the Amazon Marketplace Web Service (MWS) API. It is still missing many features, but some basic requests are available.
+ruby-mws is a Ruby gem that wraps the Amazon Marketplace Web Service (MWS) API. Right now it only supports Amazon's Order and Inventory APIs. 
 
 Please use at your own risk. This has not been tested thoroughly and is not guaranteed to work in any capacity. See the LICENSE file for more details.
 
@@ -27,7 +27,7 @@ Pass in your developer account credentials. All four params below are required.
 Let's use the Orders API to retrieve recently updated orders.
 
     # Retrieve all orders updated within the last 4 hours
-    response = mws.orders.list_orders :last_updated_after => Time.now-4.hours   # Rails helper used
+    response = mws.orders.list_orders :last_updated_after => 4.hours.ago   # ActiveSupport time helper
 
 (All datetime fields accept Time or DateTime objects, as well as strings in iso8601 format.)
 
@@ -52,7 +52,7 @@ Use `keys` and `has_key?` to discover what's in the response.
 
 For responses with long lists of data, results are returned from the service in pages (usually 100 per page). Example:
 
-    response = mws.orders.list_orders :last_updated_after => Time.now-1.week   # returns 100 orders
+    response = mws.orders.list_orders :last_updated_after => 1.week.ago   # returns 100 orders
 
 Here, there are more orders to be returned. You can call `has_next?` on the same API instance to see if the last response returned has a next page. If so, calling `next` will make the request for the next page.
 
@@ -69,8 +69,8 @@ You can always go about the manual way as per Amazon's docs:
 
 ruby-mws wraps Amazon's CamelCase convention with Ruby-friendly underscore notation. This goes for request names and params, as well as response field names.
 
-Available Requests
-------------------
+API
+---
 
     @mws = MWS.new(authentication_hash)   # initialize the connection object
 
