@@ -20,10 +20,10 @@ To quickly test your connection to the service without credentials, you can ping
 
 Pass in your developer account credentials. All four params below are required.
 
-    mws = MWS.new {:aws_access_key_id => "AKIAIFKEXAMPLE4WZHHA",
+    mws = MWS.new (:aws_access_key_id => "AKIAIFKEXAMPLE4WZHHA",
       :secret_access_key => "abc123def456/SECRET/+ghi789jkl",
       :seller_id => "A27WEXAMPLEBXY",
-      :marketplace_id => "ATVPDKIKX0DER"}
+      :marketplace_id => "ATVPDKIKX0DER")
 
 ### Requests
 
