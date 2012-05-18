@@ -6,8 +6,9 @@ module MWS
 
     class Base
       include HTTParty
-      # debug_output $stderr  # only in development
-      format :xml
+      parser MWS::API::BinaryParser
+      #debug_output $stderr  # only in development
+      #format :xml
       headers "User-Agent"   => "ruby-mws/#{MWS::VERSION} (Language=Ruby/1.9.3-p0)"
       headers "Content-Type" => "text/xml"
 
@@ -46,7 +47,14 @@ module MWS
         params[:lists][:marketplace_id] = "MarketplaceId.Id"
 
         query = Query.new params
-        @response = Response.parse self.class.send(params[:verb], query.request_uri), name, params
+        resp = self.class.send(params[:verb], query.request_uri)
+
+        @response = if resp.is_a?(Hash)
+          Response.parse resp, name, params
+        else
+          BinaryResponse.parse resp, name, params
+        end
+
         if @response.respond_to?(:next_token) and @next[:token] = @response.next_token  # modifying, not comparing
           @next[:action] = name.match(/_by_next_token/) ? name : "#{name}_by_next_token"
         end
