@@ -27,4 +27,5 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency "ruby-hmac"
   s.add_runtime_dependency "hashie"
   s.add_runtime_dependency "rash"
+  s.add_runtime_dependency "builder"
 end

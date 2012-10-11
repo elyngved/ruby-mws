@@ -1,6 +1,9 @@
 # This class serves as a parent class to the API classes.
 # It shares connection handling, query string building, ?? among the models.
 
+require 'digest'
+require 'base64'
+
 module MWS
   module API
 
@@ -31,22 +34,35 @@ module MWS
         end
       end
 
-      def send_request(name, params, options)
+      def send_request(name, params, options={})
         # prepare all required params...
         params = [params, options, @connection.to_hash].inject :merge
         
         # default/common params
         params[:action]            ||= name.to_s.camelize
+        params[:verb]              ||= :get
         params[:signature_method]  ||= 'HmacSHA256'
         params[:signature_version] ||= '2'
         params[:timestamp]         ||= Time.now.iso8601
         params[:version]           ||= '2009-01-01'
+        params[:uri]               ||= '/'
 
         params[:lists] ||= {}
         params[:lists][:marketplace_id] = "MarketplaceId.Id"
 
+        # for some requests, data is sent in HTTP request body
+        http_options = {}
+        http_options[:body] = params.delete(:body) if params.key?(:body)
+        http_options[:headers] = params.delete(:headers) if params.key?(:headers)
+        if params.delete(:content_md5)
+          http_options[:headers] ||= {}
+          digest_md5 = Digest::MD5.new
+          digest_md5 << http_options[:body]
+          http_options[:headers]['Content-MD5'] = Base64.encode64(digest_md5.digest)
+        end
+
         query = Query.new params
-        @response = Response.parse self.class.send(params[:verb], query.request_uri), name, params
+        @response = Response.parse self.class.send(params[:verb], query.request_uri, http_options), name, params
         if @response.respond_to?(:next_token) and @next[:token] = @response.next_token  # modifying, not comparing
           @next[:action] = name.match(/_by_next_token/) ? name : "#{name}_by_next_token"
         end

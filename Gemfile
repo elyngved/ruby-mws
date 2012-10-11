@@ -8,6 +8,7 @@ gem 'nokogiri'
 gem 'ruby-hmac'
 gem 'hashie'
 gem 'rash'
+gem 'builder'
 
 gem 'rspec'
 gem 'ephemeral_response'
