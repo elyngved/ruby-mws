@@ -50,19 +50,8 @@ module MWS
         params[:lists] ||= {}
         params[:lists][:marketplace_id] = "MarketplaceId.Id"
 
-        # for some requests, data is sent in HTTP request body
-        http_options = {}
-        http_options[:body] = params.delete(:body) if params.key?(:body)
-        http_options[:headers] = params.delete(:headers) if params.key?(:headers)
-        if params.delete(:content_md5)
-          http_options[:headers] ||= {}
-          digest_md5 = Digest::MD5.new
-          digest_md5 << http_options[:body]
-          http_options[:headers]['Content-MD5'] = Base64.encode64(digest_md5.digest)
-        end
-
         query = Query.new params
-        @response = Response.parse self.class.send(params[:verb], query.request_uri, http_options), name, params
+        @response = Response.parse self.class.send(params[:verb], query.request_uri, query.http_options), name, params
         if @response.respond_to?(:next_token) and @next[:token] = @response.next_token  # modifying, not comparing
           @next[:action] = name.match(/_by_next_token/) ? name : "#{name}_by_next_token"
         end

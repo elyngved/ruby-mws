@@ -10,6 +10,15 @@ module MWS
             params["#{label}.#{i+1}"] = item
           end
         end unless params[:lists].nil?
+
+        @http_options = {:headers => {}}
+        @http_options[:body]    = params.delete(:body) if params.key?(:body)
+        @http_options[:headers] = params.delete(:headers) if params.key?(:headers)
+        set_body_digest if params.delete(:content_md5)
+
+        if @params[:verb] != :get
+          @http_options[:query] = build_query_hash(signature)
+        end
       end
 
       def canonical
@@ -23,21 +32,31 @@ module MWS
       end
 
       def request_uri
-        "https://" << @params[:host] << @params[:uri] << '?' << build_sorted_query(signature)
+        uri = "https://" << @params[:host] << @params[:uri]
+        if @params[:verb] == :get
+          uri << '?' << build_sorted_query(signature)
+        end
+        uri
+      end
+
+      def http_options
+        @http_options
       end
 
       private
       def build_sorted_query(signature=nil)
+        params = build_query_hash(signature).sort.map! { |p| "#{p[0]}=#{process_param(p[1])}" }
+        params.join('&')
+      end
+
+      def build_query_hash(signature=nil)
         params = @params.dup.delete_if {|k,v| exclude_from_query.include? k}
         params[:signature] = signature if signature
         params.stringify_keys!
 
         # hack to capitalize AWS in param names
         # TODO: Allow for multiple marketplace ids
-        params = Hash[params.map{|k,v| [k.camelize.sub(/Aws/,'AWS'), v]}]
-
-        params = params.sort.map! { |p| "#{p[0]}=#{process_param(p[1])}" }
-        params.join('&')
+        Hash[params.map{|k,v| [k.camelize.sub(/Aws/,'AWS'), v]}]
       end
 
       def process_param(param)
@@ -65,6 +84,12 @@ module MWS
           :lists,
           :mods
         ]
+      end
+
+      def set_body_digest
+        digest_md5 = Digest::MD5.new
+        digest_md5 << @http_options[:body]
+        @http_options[:headers]['Content-MD5'] = Base64.encode64(digest_md5.digest)
       end
 
     end
