@@ -6,7 +6,7 @@ module MWS
     class Inventory < Base
 
       def_request [:list_inventory_supply, :list_inventory_supply_by_next_token],
-        :verb => :post,
+        :verb => :get,
         :uri => '/FulfillmentInventory/2010-10-01',
         :version => '2010-10-01',
         :lists => {

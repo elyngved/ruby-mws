@@ -15,10 +15,6 @@ module MWS
         @http_options[:body]    = params.delete(:body) if params.key?(:body)
         @http_options[:headers] = params.delete(:headers) if params.key?(:headers)
         set_body_digest if params.delete(:content_md5)
-
-        if @params[:verb] != :get
-          @http_options[:query] = build_query_hash(signature)
-        end
       end
 
       def canonical
@@ -32,11 +28,7 @@ module MWS
       end
 
       def request_uri
-        uri = "https://" << @params[:host] << @params[:uri]
-        if @params[:verb] == :get
-          uri << '?' << build_sorted_query(signature)
-        end
-        uri
+        "https://" << @params[:host] << @params[:uri] << '?' << build_sorted_query(signature)
       end
 
       def http_options
