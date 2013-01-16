@@ -53,8 +53,9 @@ module MWS
         query = Query.new params
         resp  = self.class.send(params[:verb], query.request_uri, query.http_options)
 
-        if not %w{text/xml application/xml}.include? resp.content_type
-          raise "Expected to receive XML response from Amazon MWS! Actually received: #{resp.content_type}\nStatus: #{resp.response.code}\nBody: #{resp.body.size > 4000 ? resp.body[0...4000] + '...' : resp.body}"
+        content_type = resp.headers['content-type']
+        if not content_type =~ /text\/xml/ || content_type =~ /application\/xml/
+          raise "Expected to receive XML response from Amazon MWS! Actually received: #{content_type}\nStatus: #{resp.response.code}\nBody: #{resp.body.size > 4000 ? resp.body[0...4000] + '...' : resp.body}"
         end
 
         @response = Response.parse resp, name, params
