@@ -51,7 +51,13 @@ module MWS
         params[:lists][:marketplace_id] = "MarketplaceId.Id"
 
         query = Query.new params
-        @response = Response.parse self.class.send(params[:verb], query.request_uri, query.http_options), name, params
+        resp  = self.class.send(params[:verb], query.request_uri, query.http_options)
+
+        if not %w{text/xml application/xml}.include? resp.content_type
+          raise "Expected to receive XML response from Amazon MWS! Actually received: #{resp.content_type}\nStatus: #{resp.response.code}\nBody: #{resp.body.size > 4000 ? resp.body[0...4000] + '...' : resp.body}"
+        end
+
+        @response = Response.parse resp, name, params
         if @response.respond_to?(:next_token) and @next[:token] = @response.next_token  # modifying, not comparing
           @next[:action] = name.match(/_by_next_token/) ? name : "#{name}_by_next_token"
         end
