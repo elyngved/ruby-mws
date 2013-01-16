@@ -55,7 +55,7 @@ module MWS
         # so don't check back too frequently -- otherwise our FeedSubmissionList
         #   queries will be throttled
         while true
-          sleep(20)
+          sleep(30)
           response = send_request(:get_feed_submission_list, :lists => {:feed_submission_ids => "FeedSubmissionIdList.Id"}, :feed_submission_ids => [submission_id])
           break if response.feed_submission_info.feed_processing_status == '_DONE_'
         end
