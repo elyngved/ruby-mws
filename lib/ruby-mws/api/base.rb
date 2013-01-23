@@ -51,6 +51,9 @@ module MWS
         params[:lists][:marketplace_id] = "MarketplaceId.Id"
 
         query = Query.new params
+        if $VERBOSE
+          puts "ruby-mws: Sending #{params[:verb].upcase} request to #{query.request_uri}. Options: #{query.http_options.inspect}"
+        end
         resp  = self.class.send(params[:verb], query.request_uri, query.http_options)
 
         content_type = resp.headers['content-type']
