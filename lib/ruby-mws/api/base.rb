@@ -58,7 +58,7 @@ module MWS
 
         content_type = resp.headers['content-type']
         if not content_type =~ /text\/xml/ || content_type =~ /application\/xml/ || content_type =~ /application\/octet-stream/
-          raise "Expected to receive XML response from Amazon MWS! Actually received: #{content_type}\nStatus: #{resp.response.code}\nBody: #{resp.body.size > 4000 ? resp.body[0...4000] + '...' : resp.body}"
+          raise ErrorResponse, "Expected to receive XML response from Amazon MWS! Actually received: #{content_type}\nStatus: #{resp.response.code}\nBody: #{resp.body.size > 4000 ? resp.body[0...4000] + '...' : resp.body}"
         end
 
         @response = Response.parse resp, name, params
