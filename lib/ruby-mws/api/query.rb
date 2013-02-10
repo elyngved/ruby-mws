@@ -15,6 +15,7 @@ module MWS
         @http_options[:body]    = params.delete(:body) if params.key?(:body)
         @http_options[:headers] = params.delete(:headers) if params.key?(:headers)
         @http_options[:headers]['Content-Type'] = params.delete(:content_type) if params.key?(:content_type)
+        @http_options[:format]  = params.delete(:format) if params.key?(:format)
         set_body_digest if params.delete(:content_md5)
       end
 
