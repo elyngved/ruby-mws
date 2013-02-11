@@ -7,7 +7,7 @@ module MWS
         report = get_report('_GET_MERCHANT_LISTINGS_DATA_LITER_')
         report = report.lines.map { |l| sku,quantity = l.chomp.split("\t"); [sku, quantity.to_i] }
 
-        if report[0][0] != 'seller-sku' || report[0][1] != 'quantity'
+        if report[0][0] != 'seller-sku'
           raise "Unexpected format for _GET_MERCHANT_LISTINGS_DATA_LITER_ report. Report contents: #{report.inspect}"
         end
 
