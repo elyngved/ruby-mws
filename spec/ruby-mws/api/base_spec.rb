@@ -38,5 +38,20 @@ describe MWS::API::Base do
       lambda{ @api.list_fake_objects }.should raise_error TestWorksError
     end
   end
-  
+
+  context "next token should be nil" do
+
+    it "first request then no next_token" do
+      @api.after_response
+      @api.next_token.should be_nil
+    end
+
+    it "sencond request then no next_token" do
+      @api.instance_variable_set(:@next, {token: 'last request token'})
+      @api.after_response
+      @api.next_token.should be_nil
+    end
+
+  end
+
 end
