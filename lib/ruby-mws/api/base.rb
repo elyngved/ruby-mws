@@ -1,6 +1,9 @@
 # This class serves as a parent class to the API classes.
 # It shares connection handling, query string building, ?? among the models.
 
+require 'digest'
+require 'base64'
+
 module MWS
   module API
 
@@ -31,22 +34,36 @@ module MWS
         end
       end
 
-      def send_request(name, params, options)
+      def send_request(name, params, options={})
         # prepare all required params...
         params = [params, options, @connection.to_hash].inject :merge
         
         # default/common params
         params[:action]            ||= name.to_s.camelize
+        params[:verb]              ||= :get
         params[:signature_method]  ||= 'HmacSHA256'
         params[:signature_version] ||= '2'
         params[:timestamp]         ||= Time.now.iso8601
         params[:version]           ||= '2009-01-01'
+        params[:uri]               ||= '/'
 
         params[:lists] ||= {}
         params[:lists][:marketplace_id] = "MarketplaceId.Id"
 
         query = Query.new params
-        @response = Response.parse self.class.send(params[:verb], query.request_uri), name, params
+        if $VERBOSE
+          puts "ruby-mws: Sending #{params[:verb].upcase} request to #{query.request_uri}. Options: #{query.http_options.inspect}"
+        end
+        resp  = self.class.send(params[:verb], query.request_uri, query.http_options)
+
+        content_type = resp.headers['content-type']
+        if not content_type =~ /text\/xml/ || content_type =~ /application\/xml/ || content_type =~ /application\/octet-stream/
+          raise ErrorResponse, "Expected to receive XML response from Amazon MWS! Actually received: #{content_type}\nStatus: #{resp.response.code}\nBody: #{resp.body.size > 4000 ? resp.body[0...4000] + '...' : resp.body}"
+        end
+
+        return resp.parsed_response if resp.parsed_response.is_a?(String)
+
+        @response = Response.parse resp, name, params
         if @response.respond_to?(:next_token) and @next[:token] = @response.next_token  # modifying, not comparing
           @next[:action] = name.match(/_by_next_token/) ? name : "#{name}_by_next_token"
         end

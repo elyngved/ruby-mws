@@ -23,8 +23,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "ephemeral_response"
 
   s.add_runtime_dependency "httparty"
-  s.add_runtime_dependency "nokogiri"
-  s.add_runtime_dependency "ruby-hmac"
   s.add_runtime_dependency "hashie"
   s.add_runtime_dependency "rash"
+  s.add_runtime_dependency "builder"
 end
