@@ -14,7 +14,7 @@ RSpec.configure do |config|
     @mws_object ||= MWS.new(auth_params)
   end
 
-  # To test, create spec/credentials.yml or fill in below
+  # To test, create spec/credentials.yml
   def auth_params
     @auth_params ||=
       begin
@@ -27,6 +27,11 @@ RSpec.configure do |config|
           :marketplace_id     => '123'
         }
       end
+  end
+
+  def timestamp
+    # use a recent timestamp here... how to replace this?
+    "2013-11-17T21:17:59-06:00"
   end
 end
 

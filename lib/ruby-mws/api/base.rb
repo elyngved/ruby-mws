@@ -32,16 +32,9 @@ module MWS
         end
       end
 
-      def send_request(name, params, options)
+      def send_request(name, params, options={})
         # prepare all required params...
-        params = [params, options, @connection.to_hash].inject :merge
-        
-        # default/common params
-        params[:action]            ||= name.to_s.camelize
-        params[:signature_method]  ||= 'HmacSHA256'
-        params[:signature_version] ||= '2'
-        params[:timestamp]         ||= Time.now.iso8601
-        params[:version]           ||= '2009-01-01'
+        params = [default_params, params, options, @connection.to_hash].inject :merge
 
         params[:lists] ||= {}
         params[:lists][:marketplace_id] = "MarketplaceId.Id"
@@ -55,6 +48,16 @@ module MWS
           @next[:action] = name.match(/_by_next_token/) ? name : "#{name}_by_next_token"
         end
         @response
+      end
+
+      def default_params
+        {
+          :action            => name.to_s.camelize,
+          :signature_method  => 'HmacSHA256',
+          :signature_version => '2',
+          :timestamp         => Time.now.iso8601,
+          :version           => '2009-01-01'
+        }
       end
 
       def has_next?
