@@ -66,9 +66,11 @@ Here, there are more orders to be returned. You can call `has_next?` on the same
 
 Repeat as necessary. You can keep calling `next` on the API instance as long as `has_next?` returns true.
 
-Or if you need to, you can save the next_token and go about the manual way as per Amazon's docs:
+Or if you need to, you can save `next_token` and go about the manual way as per Amazon's docs:
 
     next_response = mws.orders.list_orders_by_next_token :next_token => response.next_token
+
+***
 
 API
 ---
@@ -79,23 +81,37 @@ This object can be used to access all API services. Below are examples on how to
 
 ### Orders API
 
-* ListOrders - gets orders by time range and other parameters
+* ListOrders - Gets orders by time range and other parameters
 
     `@mws.orders.list_orders :last_updated_after => Time.now-4.hours, :order_status => 'Shipped'`
 
-* GetOrder - gets orders by Amazon order ID
+* GetOrder - Gets orders by Amazon order ID
 
     `@mws.orders.get_order :amazon_order_id => "002-EXAMPLE-0031387"`
 
     `:amazon_order_id` can be an array to retrieve multiple orders.
 
-* ListOrderItems - gets order items for one order ID (only one order at a time here)
+* ListOrderItems - Gets order items for one order ID (only one order at a time here)
 
     `@mws.orders.list_order_items :amazon_order_id => "002-EXAMPLE-0031387"`
 
 ### Fulfillment Inventory API
 
-* ListInventorySupply - returns availability of inventory, only returns items based on list of SKUs or last change date
+* ListInventorySupply - Returns availability of inventory, only returns items based on list of SKUs or last change date
 
     `@mws.inventory.list_inventory_supply :seller_skus => ['PF-5VZN-04XR', 'V4-03EY-LAL1', 'OC-TUKC-031P']`
     `@mws.inventory.list_inventory_supply :query_start_date_time => Time.now-1.day`
+
+### Reports API
+
+* RequestReport - Used to submit a request for a report by [report type](http://docs.developer.amazonservices.com/en_US/reports/Reports_ReportType.html). Returns report request info.
+
+    `@mws.reports.request_report :report_type => "_GET_FBA_FULFILLMENT_CUSTOMER_RETURNS_DATA_", :start_date => 1.day.ago, :end_date => Time.now`
+
+* GetReportRequestList - Returns a list of the most recently requested reports. Use `report_request_id` to find the status of your report. Once `report_processing_status` for your request is "_DONE_", use `generated_report_id` to get your results.
+
+    `@mws.reports.get_report_request_list`
+
+* GetReport - Used to request a report by report ID. All reports are currently returned as a flat file string.
+
+    `@mws.reports.get_report :report_id => '11223344'`
