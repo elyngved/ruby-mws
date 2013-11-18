@@ -49,11 +49,7 @@ module MWS
         query = Query.new params
         resp = self.class.send(params[:verb], query.request_uri)
 
-        @response = if resp.is_a?(Hash)
-          Response.parse resp, name, params
-        else
-          BinaryResponse.parse resp, name, params
-        end
+        @response = Response.parse resp, name, params
 
         if @response.respond_to?(:next_token) and @next[:token] = @response.next_token  # modifying, not comparing
           @next[:action] = name.match(/_by_next_token/) ? name : "#{name}_by_next_token"
