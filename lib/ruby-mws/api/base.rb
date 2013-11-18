@@ -7,7 +7,7 @@ module MWS
     class Base
       include HTTParty
       parser MWS::API::BinaryParser
-      #debug_output $stderr  # only in development
+      debug_output $stderr  # only in development
       #format :xml
       headers "User-Agent"   => "ruby-mws/#{MWS::VERSION} (Language=Ruby/1.9.3-p0)"
       headers "Content-Type" => "text/xml"
@@ -34,7 +34,7 @@ module MWS
 
       def send_request(name, params, options={})
         # prepare all required params...
-        params = [default_params, params, options, @connection.to_hash].inject :merge
+        params = [default_params(name), params, options, @connection.to_hash].inject :merge
 
         params[:lists] ||= {}
         params[:lists][:marketplace_id] = "MarketplaceId.Id"
@@ -50,7 +50,7 @@ module MWS
         @response
       end
 
-      def default_params
+      def default_params(name)
         {
           :action            => name.to_s.camelize,
           :signature_method  => 'HmacSHA256',
