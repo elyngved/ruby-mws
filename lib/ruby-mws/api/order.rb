@@ -10,7 +10,7 @@ module MWS
           :order_status => "OrderStatus.Status"
         },
         :mods => [
-          lambda {|r| r.orders = r.orders.order if r.orders}
+          lambda {|r| r.orders = [r.orders.order].flatten if r.orders},
         ]
 
       def_request [:list_order_items, :list_order_items_by_next_token],
