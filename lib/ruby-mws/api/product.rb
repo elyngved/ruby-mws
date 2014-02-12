@@ -11,7 +11,7 @@ module MWS
         },
         mods: [
           lambda { |r|
-                 puts r
+                 puts r.inspect
                  r.products = r.products.product if r.products
                }
         ]
