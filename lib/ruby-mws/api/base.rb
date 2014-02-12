@@ -37,7 +37,9 @@ module MWS
         params = [default_params(name), params, options, @connection.to_hash].inject :merge
 
         params[:lists] ||= {}
-        params[:lists][:marketplace_id] = "MarketplaceId.Id"
+        if not params[:uri].starts_with '/Products'
+          params[:lists][:marketplace_id] = "MarketplaceId.Id"
+        end
 
         query = Query.new params
         resp = self.class.send(params[:verb], query.request_uri)
