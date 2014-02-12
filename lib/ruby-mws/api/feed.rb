@@ -16,7 +16,10 @@ module MWS
         query = Query.new params
         body = Iconv.conv("iso-8859-1", "UTF8", example_body)
         resp = self.class.post(query.request_uri, :body => body,
-                               :headers => {'Content-MD5' => Digest::MD5.file(body).hexdigest})
+                               :headers => {
+                                           'Content-MD5' => Base64.encode64(Digest::MD5.digest(body)),
+                                           'Content-Type' => 'text/xml; charset=iso-8859-1'
+                                           })
 
         resp
       end
