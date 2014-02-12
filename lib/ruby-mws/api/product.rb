@@ -5,16 +5,8 @@ module MWS
       def_request [:get_matching_product],
         verb: :get,
         uri: '/Products/2011-10-01',
-        version: '2011-10-01',
-        lists: {
-          order_status: "OrderStatus.Status"
-        },
-        mods: [
-          lambda { |r|
-                 puts r.inspect
-                 r.products = r.products.product if r.products
-               }
-        ]
+        version: '2011-10-01'
+      ]
     end
   end
 end
