@@ -1,5 +1,6 @@
 require 'digest/md5'
 require 'tempfile'
+require 'iconv'
 
 module MWS
   module API
@@ -13,15 +14,12 @@ module MWS
         }
         params = [default_params('submit_feed'), query_params, options, @connection.to_hash].inject :merge
         query = Query.new params
-        body = example_body
-
-        # write body to file to get md5 hash
-        file = Tempfile.new('mws')
-        file.write(body)
-        file.close
-
-        resp = self.class.post(query.request_uri, :body => body, :headers => {'Content-MD5' => Digest::MD5.file(file.path).hexdigest})
-        file.unlink
+        body = Iconv.conv("iso-8859-1", "UTF8", example_body)
+        resp = self.class.post(query.request_uri, :body => body,
+                               :headers => {
+                                           'Content-MD5' => Base64.encode64(Digest::MD5.digest(body)),
+                                           'Content-Type' => 'text/xml; charset=iso-8859-1'
+                                           })
 
         resp
       end
