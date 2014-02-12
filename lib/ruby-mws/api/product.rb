@@ -8,7 +8,7 @@ module MWS
         mods: [
           lambda do |response|
             puts response
-            response.product.map { |p| p[:attribute_sets][:item_attributes] }
+            response.product.map { |p| p.attribute_sets.item_attributes }
           end
         ]
     end
