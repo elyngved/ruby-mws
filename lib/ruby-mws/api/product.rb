@@ -8,12 +8,7 @@ module MWS
         mods: [
           lambda do |response|
             puts response
-            response.products = response.product.map do |p|
-              p = p[0]
-              response = p[:product][:attribute_sets][:item_attributes]
-              response[:asin] = p[:asin]
-              response
-            end
+            response.product = response.product.attribute_sets.item_attributes
           end
         ]
     end
