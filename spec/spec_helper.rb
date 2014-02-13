@@ -31,7 +31,7 @@ RSpec.configure do |config|
 
   def timestamp
     # use a recent timestamp here... how to replace this?
-    "2013-11-17T21:17:59-06:00"
+    "2014-02-12T20:56:59-05:00"
   end
 end
 
