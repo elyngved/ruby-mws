@@ -1,32 +1,8 @@
 require 'pp'
 
-desc "This task is called by the Heroku scheduler add-on"
+desc 'Access MWS services'
 
 namespace :mws do
-  desc "Test download from BetterMWS"
-  task :'test-better' => :environment do
-    asin = 'B002DYJTVW'
-    url = 'http://api.bettermws.com/v1/lookup?'
-    params = {
-      merchant_id: ENV['MERCHANT_ID'],
-      marketplace_id: ENV['MARKETPLACE_ID'],
-      asin: asin,
-      persist: 24,
-      format: 'json',
-      ts: Time.now.to_i
-    }
-
-    url += params.to_query
-    
-    url += "&sig=" + Digest::MD5.hexdigest(ENV['AWS_KEY'] + url)
-    
-    uri = URI.parse(url)
-    req = Net::HTTP::Get.new(uri.to_s)
-    res = Net::HTTP.start(uri.host, uri.port) { |http| http.request(req) }
-    puts url
-    puts res.body
-  end
-
   desc "Print server time"
   task time: :environment do
     puts MWS::Base.server_time
