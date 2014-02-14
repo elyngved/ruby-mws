@@ -51,7 +51,7 @@ module MWS
 
       def default_params(name)
         {
-          :action            => name.to_s.camelize,
+          :action            => name.to_s.ruby_mws_camelize,
           :signature_method  => 'HmacSHA256',
           :signature_version => '2',
           :timestamp         => Time.now.iso8601,
