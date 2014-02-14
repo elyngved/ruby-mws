@@ -24,7 +24,6 @@ module MWS
             response.map! do |p|
               n = p.product.try(:competitive_pricing)
               if n
-                n.prices = n.competitive_prices.competitive_price
                 n.sales_rankings = p.product.sales_rankings
                 n.asin = p.asin
               end
