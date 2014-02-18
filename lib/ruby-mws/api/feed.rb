@@ -1,6 +1,6 @@
 require 'digest/md5'
-require 'tempfile'
 require 'iconv'
+require 'nokogiri'
 
 module MWS
   module API
@@ -38,28 +38,30 @@ module MWS
       end
 
       private
-      # opts require amazon_order_item_code and amazon_order_id
+      # opts require amazon_order_item_code, amazon_order_id, and merchant_order_id (internal order id)
       def content_for_ack_with(opts={})
-        body = <<-BODY
-<?xml version="1.0"?> 
-<AmazonEnvelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="amzn-envelope.xsd"> 
-<Header> 
-<DocumentVersion>1.01</DocumentVersion> 
-<MerchantIdentifier>#{@connection.seller_id}</MerchantIdentifier> 
-</Header> 
-<MessageType>OrderAcknowledgment</MessageType> 
-<Message> 
-<MessageID>1</MessageID> 
-<OrderAcknowledgement> 
-<AmazonOrderID>#{opts[:amazon_order_id]}</AmazonOrderID> 
-<StatusCode>Success</StatusCode> 
-<Item> 
-<AmazonOrderItemCode>#{opts[:amazon_order_item_code]}</AmazonOrderItemCode> 
-</Item> 
-</OrderAcknowledgment> 
-</Message> 
-</AmazonEnvelope>
-BODY
+        Nokogiri::XML::Builder.new do |xml|
+          xml.root {
+            xml.AmazonEnvelope(:"xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
+                               :"xsi:noNamespaceSchemaLocation" => "amzn-envelope.xsd") { # add attrs here
+              xml.Header {
+                xml.DocumentVersion "1.01"
+                xml.MerchantIdentifier @connection.seller_id
+              }
+              xml.MessageType "OrderAcknowledgement"
+              xml.Message {
+                xml.MessageID "1"
+                xml.OrderAchnowledgement {
+                  xml.AmazonOrderID opts[:amazon_order_id]
+                  xml.StatusCode "Success"
+                  xml.Item {
+                    xml.AmazonOrderItemCode opts[:amazon_order_item_code]
+                  }
+                }
+              }
+            }
+          }
+        end.to_xml
       end
 
       # Returns a string containing the shipping achnowledgement xml
@@ -80,43 +82,36 @@ BODY
       #                      defaults to the current time
       def content_for_ship_with(opts={})
         fulfillment_date = opts[:fulfillment_date] || DateTime.now
-        tracking_el = opts[:tracking_number] ? "<ShipperTrackingNumber>#{opts[:tracking_number]}</ShipperTrackingNumber>" : ""
-        items = opts[:items].map do |item_hash|
-          content_for_item(item_hash)
-        end.join("\n")
-        
-        body = <<-BODY
-<?xml version="1.0" encoding="UTF-8"?>
-<AmazonEnvelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="amznenvelope.xsd">
-<Header>
-<DocumentVersion>1.01</DocumentVersion>
-<MerchantIdentifier>#{@connection.seller_id}</MerchantIdentifier>
-</Header>
-<MessageType>OrderFulfillment</MessageType>
-<Message>
-<MessageID>1</MessageID>
-<OrderFulfillment>
-<MerchantOrderID>#{opts[:merchant_order_id]}</MerchantOrderID>
-<MerchantFulfillmentID>#{opts[:merchant_order_id]}</MerchantFulfillmentID>
-<FulfillmentDate>#{fulfillment_date}</FulfillmentDate>
-<FulfillmentData>
-<CarrierCode>#{opts[:carrier_code]}</CarrierCode>
-<ShippingMethod>#{opts[:shipping_method]}</ShippingMethod>
-#{tracking_el}
-</FulfillmentData>
-#{items}
-</OrderFulfillment>
-</Message>
-</AmazonEnvelope>
-BODY
-      end
 
-      def content_for_item(opts={})
-        str = '<Item>'
-        str += "<AmazonOrderItemCode>#{opts[:amazon_order_item_code]}</AmazonOrderItemCode>"
-        str += "<Quantity>#{opts[:quantity]}</Quantity>" if opts[:quantity]
-        
-        str
+        Nokogiri::XML::Builder.new do |xml|
+          xml.AmazonEnvelope('xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+                             'xsi:noNamespaceSchemaLocation' => 'amznenvelope.xsd') {
+            xml.Header {
+              xml.DocumentVersion "1.01"
+              xml.MerchantIdentifier @connection.seller_id
+            }
+            xml.MessageType "OrderFulfillment"
+            xml.Message {
+              xml.MessageID "1"
+              xml.OrderFulfillment {
+                xml.MerghantOrderID opts[:merchant_order_id]
+                xml.MerchantFulfillmentID opts[:merchant_order_id]
+                xml.FulfillmentDate fulfillment_date
+                xml.FulfillmentData {
+                  xml.CarrierCode opts[:carrier_code]
+                  xml.ShippingMethod opts[:shipping_method]
+                  xml.ShipperTrackingNumber opts[:tracking_number] if opts[:tracking_number]
+                  opts[:items].each do |item_hash|
+                    xml.Item {
+                      xml.AmazonOrderItemCode opts[:amazon_order_item_code]
+                      xml.Quantity opts[:quantity]
+                    }
+                  end
+                }
+              }
+            }
+          }
+        end.to_xml
       end
     end
   end
