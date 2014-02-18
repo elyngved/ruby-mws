@@ -7,9 +7,14 @@ module MWS
     class Feed < Base
       ORDER_ACK = '_POST_ORDER_ACKNOWLEDGEMENT_DATA_'
       SHIP_ACK = '_POST_ORDER_FULFILLMENT_DATA_'
-      
-      # TODO: think about whether we should make this more general
-      # for submission back to the author's fork
+
+      # POSTs a request to the submit feed action of the feeds api
+      #
+      # @param type [String] either MWS::API::Feed::ORDER_ACK or SHIP_ACK
+      # @param content_params [Hash{Symbol => String,Hash,Integer}]
+      # @return [MWS::API::Response] The response from Amazon
+      # @todo Think about whether we should make this more general
+      #   for submission back to the author's fork
       def submit_feed(type=nil, content_params={})
         name = :submit_feed
         body = case type
@@ -38,12 +43,17 @@ module MWS
       end
 
       private
-      # opts require amazon_order_item_code, amazon_order_id, and merchant_order_id (internal order id)
+      # Returns a string containing the order acknowledgement xml
+      #
+      # @param opts [Hash{Symbol => String}] contains
+      # @option opts [String] :amazon_order_item_code ID of the specific item in the order
+      # @option opts [String] :amazon_order_id ID of the order on amazon's side
+      # @option opts [String] :merchant_order_id Internal order id
       def content_for_ack_with(opts={})
         Nokogiri::XML::Builder.new do |xml|
           xml.root {
-            xml.AmazonEnvelope(:"xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
-                               :"xsi:noNamespaceSchemaLocation" => "amzn-envelope.xsd") { # add attrs here
+            xml.AmazonEnvelope("xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
+                               "xsi:noNamespaceSchemaLocation" => "amzn-envelope.xsd") { # add attrs here
               xml.Header {
                 xml.DocumentVersion "1.01"
                 xml.MerchantIdentifier @connection.seller_id
@@ -66,20 +76,18 @@ module MWS
 
       # Returns a string containing the shipping achnowledgement xml
       #
-      # opts is a hash containing
-      #  :merchant_order_id - the internal order id
-      #  :carrier_code - string representing a shipper code
-      #                  possible codes are USPS, UPS, FedEx, DHL,
-      #                  Fastway, GLS, GO!, NipponExpress, YamatoTransport
-      #                  Hermes Logistik Gruppe, Royal Mail, Parcelforce,
-      #                  City Link, TNT, Target, SagawaExpress,
-      #                  
-      #  :shipping_method - string describing method (i.e. 2nd Day)
-      #  :items - an array of hashes with :amazon_order_item_code and
-      #           :quantity keys
-      #  :tracking_number - (optional) shipper tracking number
-      #  :fulfillment_date - (optional) DateTime the order was fulfilled
-      #                      defaults to the current time
+      # @param [Hash{Symbol => String,Array,DateTime}] opts contains:
+      # @option opts [String] :merchant_order_id The internal order id
+      # @option opts [String] :carrier_code Represents a shipper code
+      #   possible codes are USPS, UPS, FedEx, DHL, Fastway, GLS, GO!,
+      #   NipponExpress, YamatoTransport, Hermes Logistik Gruppe,
+      #   Royal Mail, Parcelforce, City Link, TNT, Target, SagawaExpress
+      # @option opts [String] :shipping_method string describing method (i.e. 2nd Day)
+      # @option opts [Array<Hash>] :items item specifics including :amazon_order_item_code
+      #   and :quantity keys
+      # @option opts [String] :tracking_number (optional) shipper tracking number
+      # @option opts [String] :fulfillment_date (optional) DateTime the order was fulfilled
+      #   defaults to the current time
       def content_for_ship_with(opts={})
         fulfillment_date = opts[:fulfillment_date] || DateTime.now
 
