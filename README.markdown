@@ -115,3 +115,19 @@ This object can be used to access all API services. Below are examples on how to
 * GetReport - Used to request a report by report ID. All reports are currently returned as a flat file string.
 
     `@mws.reports.get_report :report_id => '11223344'`
+
+Testing
+-------
+
+Add the file `spec/credentials.yml` that looks like
+
+```
+aws_access_key_id: '[access key]'
+secret_access_key: '[secret access key]'
+seller_id: '[seller id]'
+marketplace_id: '[marketplace id]'
+```
+
+Then run `bundle exec rspec spec/`
+
+There's still work and research to be done on how to integrate our changes in with the author's. Because we're using different credentials than the author and there are hardcodede order ids in the specs we'll never have all the specs passing for all of us.
