@@ -56,8 +56,32 @@ describe MWS::API::Order do
     end
 
     describe "list_order_items_by_next_token" do
+    end
 
+    describe "callback block" do
+      let(:response_callback) {double("callback", :call => nil)}
+      let(:mws) {MWS.new(auth_params.merge(:response_callback => response_callback))}
+      let(:order_id) {
+        # just grab one order id
+        # if this doesn't work most things will fail
+        orders = mws.orders.list_orders :last_updated_after => "2012-01-15T13:07:26-05:00"
+        orders.orders.first.amazon_order_id
+      }
+
+      it "should be called on list order items" do
+        expect(response_callback).to receive(:call)
+        mws.orders.list_order_items :amazon_order_id => order_id
+      end
+
+      it "should be called on list orders" do
+        expect(response_callback).to receive(:call)
+        mws.orders.list_orders :last_updated_after => "2012-01-15T13:07:26-05:00"
+      end
+
+      it "should be called on list order items" do 
+        expect(response_callback).to receive(:call)
+        mws.orders.list_order_items :amazon_order_id => order_id
+      end
     end
   end
-
 end

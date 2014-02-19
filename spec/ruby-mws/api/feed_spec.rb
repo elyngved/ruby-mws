@@ -43,5 +43,22 @@ describe MWS::API::Feed do
         info.feed_type.should == MWS::API::Feed::SHIP_ACK
       end
     end
+    
+    describe "callback block" do
+      let(:response_callback) {double("callback", :call => nil)}
+      let(:mws) {MWS.new(auth_params.merge(:response_callback => response_callback))}
+
+      it "should be called on list order items" do
+        expect(response_callback).to receive(:call)
+        response = mws.feeds.submit_feed(MWS::API::Feed::ORDER_ACK, {
+                                           :amazon_order_id => '105-1063273-7151427'
+                                         })
+
+      end
+    end
   end
 end
+
+
+
+

@@ -13,6 +13,8 @@ module MWS
       @host ||= DEFAULT_HOST
 
       attrs.each { |a| raise MissingConnectionOptions, ":#{a} is required" if instance_variable_get("@#{a}").nil?}
+
+      @response_callback = options[:response_callback]
     end
 
     def public_attrs
@@ -46,6 +48,14 @@ module MWS
     def self.server_time(host=DEFAULT_HOST)
       response = HTTParty.get("https://#{host}")
       Time.parse(response['PingResponse']['Timestamp']['timestamp'])
+    end
+
+    # Calls the response_callback block if it's defined
+    #
+    # @param response [HTTParty::Response] The response returned by
+    #   HTTParty
+    def call_callback(response)
+      @response_callback.call(response) if @response_callback
     end
   end
 
