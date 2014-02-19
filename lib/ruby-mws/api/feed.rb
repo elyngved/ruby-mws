@@ -1,15 +1,20 @@
 require 'digest/md5'
-require 'tempfile'
 require 'iconv'
+require 'nokogiri'
 
 module MWS
   module API
     class Feed < Base
       ORDER_ACK = '_POST_ORDER_ACKNOWLEDGEMENT_DATA_'
       SHIP_ACK = '_POST_ORDER_FULFILLMENT_DATA_'
-      
-      # TODO: think about whether we should make this more general
-      # for submission back to the author's fork
+
+      # POSTs a request to the submit feed action of the feeds api
+      #
+      # @param type [String] either MWS::API::Feed::ORDER_ACK or SHIP_ACK
+      # @param content_params [Hash{Symbol => String,Hash,Integer}]
+      # @return [MWS::API::Response] The response from Amazon
+      # @todo Think about whether we should make this more general
+      #   for submission back to the author's fork
       def submit_feed(type=nil, content_params={})
         name = :submit_feed
         body = case type
@@ -38,85 +43,83 @@ module MWS
       end
 
       private
-      # opts require amazon_order_item_code and amazon_order_id
+      # Returns a string containing the order acknowledgement xml
+      #
+      # @param opts [Hash{Symbol => String}] contains
+      # @option opts [String] :amazon_order_item_code ID of the specific item in the order
+      # @option opts [String] :amazon_order_id ID of the order on amazon's side
+      # @option opts [String] :merchant_order_id Internal order id
       def content_for_ack_with(opts={})
-        body = <<-BODY
-<?xml version="1.0"?> 
-<AmazonEnvelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="amzn-envelope.xsd"> 
-<Header> 
-<DocumentVersion>1.01</DocumentVersion> 
-<MerchantIdentifier>#{@connection.seller_id}</MerchantIdentifier> 
-</Header> 
-<MessageType>OrderAcknowledgment</MessageType> 
-<Message> 
-<MessageID>1</MessageID> 
-<OrderAcknowledgement> 
-<AmazonOrderID>#{opts[:amazon_order_id]}</AmazonOrderID> 
-<StatusCode>Success</StatusCode> 
-<Item> 
-<AmazonOrderItemCode>#{opts[:amazon_order_item_code]}</AmazonOrderItemCode> 
-</Item> 
-</OrderAcknowledgment> 
-</Message> 
-</AmazonEnvelope>
-BODY
+        Nokogiri::XML::Builder.new do |xml|
+          xml.root {
+            xml.AmazonEnvelope("xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
+                               "xsi:noNamespaceSchemaLocation" => "amzn-envelope.xsd") { # add attrs here
+              xml.Header {
+                xml.DocumentVersion "1.01"
+                xml.MerchantIdentifier @connection.seller_id
+              }
+              xml.MessageType "OrderAcknowledgement"
+              xml.Message {
+                xml.MessageID "1"
+                xml.OrderAchnowledgement {
+                  xml.AmazonOrderID opts[:amazon_order_id]
+                  xml.StatusCode "Success"
+                  xml.Item {
+                    xml.AmazonOrderItemCode opts[:amazon_order_item_code]
+                  }
+                }
+              }
+            }
+          }
+        end.to_xml
       end
 
       # Returns a string containing the shipping achnowledgement xml
       #
-      # opts is a hash containing
-      #  :merchant_order_id - the internal order id
-      #  :carrier_code - string representing a shipper code
-      #                  possible codes are USPS, UPS, FedEx, DHL,
-      #                  Fastway, GLS, GO!, NipponExpress, YamatoTransport
-      #                  Hermes Logistik Gruppe, Royal Mail, Parcelforce,
-      #                  City Link, TNT, Target, SagawaExpress,
-      #                  
-      #  :shipping_method - string describing method (i.e. 2nd Day)
-      #  :items - an array of hashes with :amazon_order_item_code and
-      #           :quantity keys
-      #  :tracking_number - (optional) shipper tracking number
-      #  :fulfillment_date - (optional) DateTime the order was fulfilled
-      #                      defaults to the current time
+      # @param [Hash{Symbol => String,Array,DateTime}] opts contains:
+      # @option opts [String] :merchant_order_id The internal order id
+      # @option opts [String] :carrier_code Represents a shipper code
+      #   possible codes are USPS, UPS, FedEx, DHL, Fastway, GLS, GO!,
+      #   NipponExpress, YamatoTransport, Hermes Logistik Gruppe,
+      #   Royal Mail, Parcelforce, City Link, TNT, Target, SagawaExpress
+      # @option opts [String] :shipping_method string describing method (i.e. 2nd Day)
+      # @option opts [Array<Hash>] :items item specifics including :amazon_order_item_code
+      #   and :quantity keys
+      # @option opts [String] :tracking_number (optional) shipper tracking number
+      # @option opts [String] :fulfillment_date (optional) DateTime the order was fulfilled
+      #   defaults to the current time
       def content_for_ship_with(opts={})
         fulfillment_date = opts[:fulfillment_date] || DateTime.now
-        tracking_el = opts[:tracking_number] ? "<ShipperTrackingNumber>#{opts[:tracking_number]}</ShipperTrackingNumber>" : ""
-        items = opts[:items].map do |item_hash|
-          content_for_item(item_hash)
-        end.join("\n")
-        
-        body = <<-BODY
-<?xml version="1.0" encoding="UTF-8"?>
-<AmazonEnvelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="amznenvelope.xsd">
-<Header>
-<DocumentVersion>1.01</DocumentVersion>
-<MerchantIdentifier>#{@connection.seller_id}</MerchantIdentifier>
-</Header>
-<MessageType>OrderFulfillment</MessageType>
-<Message>
-<MessageID>1</MessageID>
-<OrderFulfillment>
-<MerchantOrderID>#{opts[:merchant_order_id]}</MerchantOrderID>
-<MerchantFulfillmentID>#{opts[:merchant_order_id]}</MerchantFulfillmentID>
-<FulfillmentDate>#{fulfillment_date}</FulfillmentDate>
-<FulfillmentData>
-<CarrierCode>#{opts[:carrier_code]}</CarrierCode>
-<ShippingMethod>#{opts[:shipping_method]}</ShippingMethod>
-#{tracking_el}
-</FulfillmentData>
-#{items}
-</OrderFulfillment>
-</Message>
-</AmazonEnvelope>
-BODY
-      end
 
-      def content_for_item(opts={})
-        str = '<Item>'
-        str += "<AmazonOrderItemCode>#{opts[:amazon_order_item_code]}</AmazonOrderItemCode>"
-        str += "<Quantity>#{opts[:quantity]}</Quantity>" if opts[:quantity]
-        
-        str
+        Nokogiri::XML::Builder.new do |xml|
+          xml.AmazonEnvelope('xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+                             'xsi:noNamespaceSchemaLocation' => 'amznenvelope.xsd') {
+            xml.Header {
+              xml.DocumentVersion "1.01"
+              xml.MerchantIdentifier @connection.seller_id
+            }
+            xml.MessageType "OrderFulfillment"
+            xml.Message {
+              xml.MessageID "1"
+              xml.OrderFulfillment {
+                xml.MerghantOrderID opts[:merchant_order_id]
+                xml.MerchantFulfillmentID opts[:merchant_order_id]
+                xml.FulfillmentDate fulfillment_date
+                xml.FulfillmentData {
+                  xml.CarrierCode opts[:carrier_code]
+                  xml.ShippingMethod opts[:shipping_method]
+                  xml.ShipperTrackingNumber opts[:tracking_number] if opts[:tracking_number]
+                  opts[:items].each do |item_hash|
+                    xml.Item {
+                      xml.AmazonOrderItemCode opts[:amazon_order_item_code]
+                      xml.Quantity opts[:quantity]
+                    }
+                  end
+                }
+              }
+            }
+          }
+        end.to_xml
       end
     end
   end
