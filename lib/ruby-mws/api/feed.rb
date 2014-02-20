@@ -23,7 +23,6 @@ module MWS
                when SHIP_ACK
                  content_for_ship_with(content_params)
                end
-        body = Iconv.conv("iso-8859-1", "UTF8", body)
         query_params = {:feed_type => type}
         options = {
           :verb => :post,
