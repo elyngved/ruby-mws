@@ -1,5 +1,4 @@
 require 'digest/md5'
-require 'iconv'
 require 'nokogiri'
 
 module MWS
