@@ -36,6 +36,7 @@ module MWS
                                            'Content-MD5' => Base64.encode64(Digest::MD5.digest(body)),
                                            'Content-Type' => 'text/xml; charset=iso-8859-1'
                                            })
+        @connection.call_callback(resp)
 
         Response.parse resp, name, params
       end

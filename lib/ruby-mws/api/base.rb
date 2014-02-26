@@ -41,6 +41,8 @@ module MWS
         query = Query.new params
         resp = self.class.send(params[:verb], query.request_uri)
 
+        @connection.call_callback(resp)
+
         @response = Response.parse resp, name, params
 
         if @response.respond_to?(:next_token) and @next[:token] = @response.next_token  # modifying, not comparing
