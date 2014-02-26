@@ -1,6 +1,5 @@
 require 'digest/md5'
 require 'nokogiri'
-require 'pry'
 
 module MWS
   module API
