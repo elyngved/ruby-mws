@@ -76,17 +76,19 @@ module MWS
       # Returns a string containing the shipping achnowledgement xml
       #
       # @param [Hash{Symbol => String,Array,DateTime}] opts contains:
-      # @option opts [String] :merchant_order_id The internal order id
-      # @option opts [String] :carrier_code Represents a shipper code
-      #   possible codes are USPS, UPS, FedEx, DHL, Fastway, GLS, GO!,
-      #   NipponExpress, YamatoTransport, Hermes Logistik Gruppe,
-      #   Royal Mail, Parcelforce, City Link, TNT, Target, SagawaExpress
-      # @option opts [String] :shipping_method string describing method (i.e. 2nd Day)
-      # @option opts [Array<Hash>] :items item specifics including :amazon_order_item_code
-      #   and :quantity keys
-      # @option opts [String] :tracking_number (optional) shipper tracking number
-      # @option opts [String] :fulfillment_date (optional) DateTime the order was fulfilled
-      #   defaults to the current time
+      # @option opts [Array<Hash>] :orders order specifics including:
+      #   @option opts [String] :merchant_order_id The internal order id
+      #   @option opts [String] :carrier_code Represents a shipper code
+      #     possible codes are USPS, UPS, FedEx, DHL, Fastway, GLS, GO!,
+      #     NipponExpress, YamatoTransport, Hermes Logistik Gruppe,
+      #     Royal Mail, Parcelforce, City Link, TNT, Target, SagawaExpress
+      #   @option opts [String] :shipping_method string describing method (i.e. 2nd Day)
+      #   @option opts [Array<Hash>] :items item specifics including:
+      #     :amazon_order_item_code
+      #     :quantity keys
+      #   @option opts [String] :tracking_number (optional) shipper tracking number
+      #   @option opts [String] :fulfillment_date (optional) DateTime the order was fulfilled
+      #     defaults to the current time
       def content_for_ship_with(opts={})
         fulfillment_date = opts[:fulfillment_date] || DateTime.now
 
@@ -97,26 +99,28 @@ module MWS
               xml.DocumentVersion "1.01"
               xml.MerchantIdentifier @connection.seller_id
             }
-            xml.MessageType "OrderFulfillment"
-            xml.Message {
-              xml.MessageID "1"
-              xml.OrderFulfillment {
-                xml.MerghantOrderID opts[:merchant_order_id]
-                xml.MerchantFulfillmentID opts[:merchant_order_id]
-                xml.FulfillmentDate fulfillment_date
-                xml.FulfillmentData {
-                  xml.CarrierCode opts[:carrier_code]
-                  xml.ShippingMethod opts[:shipping_method]
-                  xml.ShipperTrackingNumber opts[:tracking_number] if opts[:tracking_number]
-                  opts[:items].each do |item_hash|
-                    xml.Item {
-                      xml.AmazonOrderItemCode opts[:amazon_order_item_code]
-                      xml.Quantity opts[:quantity]
-                    }
-                  end
+            opts[:orders].each do |order_hash|
+              xml.MessageType "OrderFulfillment"
+              xml.Message {
+                xml.MessageID order_hash[:message_id]
+                xml.OrderFulfillment {
+                  xml.MerchantOrderID order_hash[:merchant_order_id]
+                  xml.MerchantFulfillmentID order_hash[:merchant_order_id]
+                  xml.FulfillmentDate fulfillment_date
+                  xml.FulfillmentData {
+                    xml.CarrierCode order_hash[:carrier_code]
+                    xml.ShippingMethod order_hash[:shipping_method]
+                    xml.ShipperTrackingNumber order_hash[:tracking_number] if order_hash[:tracking_number]
+                    order_hash[:items].each do |item_hash|
+                      xml.Item {
+                        xml.AmazonOrderItemCode item_hash[:amazon_order_item_code]
+                        xml.Quantity item_hash[:quantity]
+                      }
+                    end
+                  }
                 }
               }
-            }
+            end
           }
         end.to_xml
       end
