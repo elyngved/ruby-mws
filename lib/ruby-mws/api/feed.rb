@@ -48,6 +48,7 @@ module MWS
       # @option opts [String] :amazon_order_item_code ID of the specific item in the order
       # @option opts [String] :amazon_order_id ID of the order on amazon's side
       # @option opts [String] :merchant_order_id Internal order id
+      # @option opts [String] :merchant_order_item_id Internal order line item id      
       def content_for_ack_with(opts={})
         Nokogiri::XML::Builder.new do |xml|
           xml.root {
@@ -62,9 +63,11 @@ module MWS
                 xml.MessageID "1"
                 xml.OrderAchnowledgement {
                   xml.AmazonOrderID opts[:amazon_order_id]
+                  xml.MerchantOrderID opts[:merchant_order_id]                  
                   xml.StatusCode "Success"
                   xml.Item {
                     xml.AmazonOrderItemCode opts[:amazon_order_item_code]
+                    xml.MerchantOrderItemID opts[:merchant_order_item_id]
                   }
                 }
               }
@@ -89,6 +92,7 @@ module MWS
       #   @option opts [String] :tracking_number (optional) shipper tracking number
       #   @option opts [String] :fulfillment_date (optional) DateTime the order was fulfilled
       #     defaults to the current time
+      #   @option opts [String] :merchant_order_item_id Internal order line item id            
       def content_for_ship_with(opts={})
         fulfillment_date = opts[:fulfillment_date] || DateTime.now
 
@@ -115,6 +119,7 @@ module MWS
                       xml.Item {
                         xml.AmazonOrderItemCode item_hash[:amazon_order_item_code]
                         xml.Quantity item_hash[:quantity]
+                        xml.MerchantOrderItemID item_hash[:merchant_order_item_id]                        
                       }
                     end
                   }
