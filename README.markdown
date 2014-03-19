@@ -79,6 +79,25 @@ API
 
 This object can be used to access all API services. Below are examples on how to make the different requests that are available so far. Refer to the [Amazon MWS Reference Docs](https://developer.amazonservices.com/) for available fields for each request.
 
+### Products API
+
+* ListMatchingProducts - Gets a list of products and their attributes, based on a search query
+    `@mws.products.list_matching_products query: 'Habermaas'`
+
+    `:query` receive any string
+    `:query_context_id` receive any of the values listed [here](http://docs.developer.amazonservices.com/en_US/products/Products_QueryContextIDs.html)
+
+
+* GetMatchingProduct - Gets a list of products and their attributes, based on a list of ASIN values.
+    `@mws.products.get_matching_product asin_list: "asincode"`
+
+    `:asin_list` can be an array to retrieve multiple products
+
+
+* GetMatchingProductForId - Gets a list of products and their attributes, based on a list of ASIN, GCID, SellerSKU, UPC, EAN, ISBN, and JAN values
+
+    `@mws.products.get_matching_product_for_id id_list: "B0012KCLIG", id_type: "ASIN"`
+
 ### Orders API
 
 * ListOrders - Gets orders by time range and other parameters
