@@ -98,6 +98,9 @@ This object can be used to access all API services. Below are examples on how to
 
     `@mws.products.get_matching_product_for_id id_list: "B0012KCLIG", id_type: "ASIN"`
 
+    `:id_list` can be an array to retrieve multiple products
+    `:id_type` can be any of the following ASIN, GCID, SellerSKU, UPC, EAN, ISBN, and JAN
+
 ### Orders API
 
 * ListOrders - Gets orders by time range and other parameters
