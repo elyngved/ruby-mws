@@ -21,6 +21,12 @@ AWSAccessKeyId=#{default_params[:aws_access_key_id]}&Action=ListOrders&LastUpdat
     end
   end
 
+  context ".safe_params" do
+    it "should remove all the unsafe params" do
+      safe_params = @query.safe_params.keys.should_not include(:mods, :aws_access_key_id, :seller_id, :secret_access_key)
+    end
+  end
+
   def default_params
     # some random keys
     params = {

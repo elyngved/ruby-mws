@@ -2,6 +2,7 @@ module MWS
   module API
 
     class Query
+      UNSAFE_PARAMS = [:mods, :aws_access_key_id, :seller_id, :secret_access_key].freeze
 
       def initialize(params)
         @params = params
@@ -24,6 +25,12 @@ module MWS
 
       def request_uri
         "https://" << @params[:host] << @params[:uri] << '?' << build_sorted_query(signature)
+      end
+
+      # Strips all the "unsafe" keys from the params instance var
+      # @return [Hash] cleaned params
+      def safe_params
+        @params.reject{|key,_| UNSAFE_PARAMS.include? key}
       end
 
       private
