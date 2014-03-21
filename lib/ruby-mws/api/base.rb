@@ -41,7 +41,8 @@ module MWS
         query = Query.new params
         resp = self.class.send(params[:verb], query.request_uri)
 
-        @connection.call_callback(resp)
+        @connection.call_communication_callbacks(:params => query.safe_params,
+                                                 :response => resp)
 
         @response = Response.parse resp, name, params
 
