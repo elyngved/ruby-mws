@@ -98,7 +98,7 @@ module MWS
 
         Nokogiri::XML::Builder.new do |xml|
           xml.AmazonEnvelope('xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-                             'xsi:noNamespaceSchemaLocation' => 'amznenvelope.xsd') {
+                             'xsi:noNamespaceSchemaLocation' => 'amzn-envelope.xsd') {
             xml.Header {
               xml.DocumentVersion "1.01"
               xml.MerchantIdentifier @connection.seller_id
