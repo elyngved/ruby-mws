@@ -81,6 +81,8 @@ module MWS
       # @param [Hash{Symbol => String,Array,DateTime}] opts contains:
       # @option opts [Array<Hash>] :orders order specifics including:
       #   @option opts [String] :merchant_order_id The internal order id
+      #   @option opts [String] :amazon_order_id The id assigned to the order
+      #     by amazon.
       #   @option opts [String] :carrier_code Represents a shipper code
       #     possible codes are USPS, UPS, FedEx, DHL, Fastway, GLS, GO!,
       #     NipponExpress, YamatoTransport, Hermes Logistik Gruppe,
