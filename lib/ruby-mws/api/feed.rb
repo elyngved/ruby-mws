@@ -108,6 +108,7 @@ module MWS
               xml.Message {
                 xml.MessageID order_hash[:message_id]
                 xml.OrderFulfillment {
+                  xml.AmazonOrderID order_hash[:amazon_order_id]
                   xml.MerchantOrderID order_hash[:merchant_order_id]
                   xml.MerchantFulfillmentID order_hash[:merchant_order_id]
                   xml.FulfillmentDate fulfillment_date
@@ -115,14 +116,13 @@ module MWS
                     xml.CarrierCode order_hash[:carrier_code]
                     xml.ShippingMethod order_hash[:shipping_method]
                     xml.ShipperTrackingNumber order_hash[:tracking_number] if order_hash[:tracking_number]
-                    order_hash[:items].each do |item_hash|
-                      xml.Item {
-                        xml.AmazonOrderItemCode item_hash[:amazon_order_item_code]
-                        xml.Quantity item_hash[:quantity]
-                        xml.MerchantOrderItemID item_hash[:merchant_order_item_id]                        
-                      }
-                    end
                   }
+                  order_hash[:items].each do |item_hash|
+                    xml.Item {
+                      xml.AmazonOrderItemCode item_hash[:amazon_order_item_code]
+                      xml.Quantity item_hash[:quantity]
+                    }
+                  end
                 }
               }
             end
