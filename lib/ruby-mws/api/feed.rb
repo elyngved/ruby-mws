@@ -109,8 +109,6 @@ module MWS
                 xml.MessageID order_hash[:message_id]
                 xml.OrderFulfillment {
                   xml.AmazonOrderID order_hash[:amazon_order_id]
-                  xml.MerchantOrderID order_hash[:merchant_order_id]
-                  xml.MerchantFulfillmentID order_hash[:merchant_order_id]
                   xml.FulfillmentDate fulfillment_date
                   xml.FulfillmentData {
                     xml.CarrierCode order_hash[:carrier_code]
