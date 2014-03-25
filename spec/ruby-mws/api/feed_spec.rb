@@ -8,10 +8,12 @@ describe MWS::API::Feed do
 
   context "requests" do
     let(:mws) {@mws = MWS.new(auth_params)}
+    let(:first_order_id) {'105-8268075-6520231'}
+    let(:second_order_id) {'105-8268075-6520232'}
     let(:orders_hash) {
       {
         :orders => [ {
-                       :amazon_order_id => '105-8268075-6520231',
+                       :amazon_order_id => first_order_id,
                        :shipping_method => '2nd Day',
                        :items => [
                                   {
@@ -24,7 +26,7 @@ describe MWS::API::Feed do
                                   }
                                  ]
                      },{
-                       :amazon_order_id => '105-8268075-6520232',
+                       :amazon_order_id => second_order_id,
                        :shipping_method => '2nd Day',
                        :items => [
                                   {
@@ -70,7 +72,12 @@ describe MWS::API::Feed do
           body = hash[:body]
           
           body_doc = Nokogiri.parse(body)
-          body_doc.css('AmazonEnvelope Message OrderFulfillment AmazonOrderID').should_not be_empty
+          ids = body_doc.css('AmazonEnvelope Message OrderFulfillment AmazonOrderID')
+
+          ids.should_not be_empty
+          ids[0].text.should == first_order_id
+          ids[1].text.should == second_order_id
+          
           body_doc.css('AmazonEnvelope Message Item').should_not be_empty
         end
         response = mws.feeds.submit_feed(MWS::API::Feed::SHIP_ACK, orders_hash)
