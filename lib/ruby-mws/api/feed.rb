@@ -82,6 +82,8 @@ module MWS
       # @param [Hash{Symbol => String,Array,DateTime}] opts contains:
       # @option opts [Array<Hash>] :orders order specifics including:
       #   @option opts [String] :merchant_order_id The internal order id
+      #   @option opts [String] :amazon_order_id The id assigned to the order
+      #     by amazon.
       #   @option opts [String] :carrier_code Represents a shipper code
       #     possible codes are USPS, UPS, FedEx, DHL, Fastway, GLS, GO!,
       #     NipponExpress, YamatoTransport, Hermes Logistik Gruppe,
@@ -99,7 +101,7 @@ module MWS
 
         Nokogiri::XML::Builder.new do |xml|
           xml.AmazonEnvelope('xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-                             'xsi:noNamespaceSchemaLocation' => 'amznenvelope.xsd') {
+                             'xsi:noNamespaceSchemaLocation' => 'amzn-envelope.xsd') {
             xml.Header {
               xml.DocumentVersion "1.01"
               xml.MerchantIdentifier @connection.seller_id
@@ -109,21 +111,19 @@ module MWS
               xml.Message {
                 xml.MessageID order_hash[:message_id]
                 xml.OrderFulfillment {
-                  xml.MerchantOrderID order_hash[:merchant_order_id]
-                  xml.MerchantFulfillmentID order_hash[:merchant_order_id]
+                  xml.AmazonOrderID order_hash[:amazon_order_id]
                   xml.FulfillmentDate fulfillment_date
                   xml.FulfillmentData {
                     xml.CarrierCode order_hash[:carrier_code]
                     xml.ShippingMethod order_hash[:shipping_method]
                     xml.ShipperTrackingNumber order_hash[:tracking_number] if order_hash[:tracking_number]
-                    order_hash[:items].each do |item_hash|
-                      xml.Item {
-                        xml.AmazonOrderItemCode item_hash[:amazon_order_item_code]
-                        xml.Quantity item_hash[:quantity]
-                        xml.MerchantOrderItemID item_hash[:merchant_order_item_id]                        
-                      }
-                    end
                   }
+                  order_hash[:items].each do |item_hash|
+                    xml.Item {
+                      xml.AmazonOrderItemCode item_hash[:amazon_order_item_code]
+                      xml.Quantity item_hash[:quantity]
+                    }
+                  end
                 }
               }
             end
