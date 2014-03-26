@@ -55,9 +55,9 @@ module MWS
     # if they're defined
     #
     # @param comm [Hash] the communications between amazon and us
-    # @option comm [Hash]   :params the request parameters
+    # @option comm [Hash] :params the request parameters
     # @option comm [String] :body the request body
-    # @option comm [Hash]   :response [HTTParty::Response] The response returned
+    # @option comm [HTTParty::Response] :response The response returned
     #   by HTTParty
     def call_communication_callbacks(comm)
       @request_callback.call(comm[:params], comm[:body] || '') if @request_callback
