@@ -30,7 +30,7 @@ module MWS
       # Strips all the "unsafe" keys from the params instance var
       # @return [Hash] cleaned params
       def safe_params
-        @params.reject{|key,_| UNSAFE_PARAMS.include? key}
+        @params.reject{|key,_| UNSAFE_PARAMS.include? key.to_sym}
       end
 
       private

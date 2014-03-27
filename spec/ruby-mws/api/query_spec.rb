@@ -23,7 +23,12 @@ AWSAccessKeyId=#{default_params[:aws_access_key_id]}&Action=ListOrders&LastUpdat
 
   context ".safe_params" do
     it "should remove all the unsafe params" do
-      safe_params = @query.safe_params.keys.should_not include(:mods, :aws_access_key_id, :seller_id, :secret_access_key)
+      @query.safe_params.keys.should_not include(:mods, :aws_access_key_id, :seller_id, :secret_access_key)
+    end
+
+    it "should also remove unsafe params if the keys are strings" do
+      query = MWS::API::Query.new(default_params.merge("mods" => "something"))
+      query.safe_params.keys.should_not include("mods")      
     end
   end
 
