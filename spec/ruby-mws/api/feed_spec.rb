@@ -10,7 +10,7 @@ describe MWS::API::Feed do
     let(:mws) {@mws = MWS.new(auth_params)}
     let(:first_order_id) {'105-8268075-6520231'}
     let(:second_order_id) {'105-8268075-6520232'}
-    let(:orders_hash) {
+    let(:shipment_hash) {
       {
         :orders => [ {
                        :amazon_order_id => first_order_id,
@@ -58,7 +58,7 @@ describe MWS::API::Feed do
       end
 
       it "should be able to ack a shipment" do
-        response = mws.feeds.submit_feed(MWS::API::Feed::SHIP_ACK, orders_hash)
+        response = mws.feeds.submit_feed(MWS::API::Feed::SHIP_ACK, shipment_hash)
         response.feed_submission_info.should_not be_nil
 
         info = response.feed_submission_info
@@ -80,7 +80,7 @@ describe MWS::API::Feed do
           
           body_doc.css('AmazonEnvelope Message Item').should_not be_empty
         end
-        response = mws.feeds.submit_feed(MWS::API::Feed::SHIP_ACK, orders_hash)
+        response = mws.feeds.submit_feed(MWS::API::Feed::SHIP_ACK, shipment_hash)
       end
     end
     
