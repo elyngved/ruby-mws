@@ -60,7 +60,7 @@ module MWS
             xml.MessageType "OrderAcknowledgement"
             xml.Message {
               xml.MessageID "1"
-                xml.OrderAcknowledgement {
+              xml.OrderAcknowledgement {
                 xml.AmazonOrderID opts[:amazon_order_id]
                 xml.MerchantOrderID opts[:merchant_order_id]                  
                 xml.StatusCode "Success"
