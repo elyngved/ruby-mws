@@ -59,8 +59,10 @@ describe MWS::API::Order do
     end
 
     describe "callback block" do
-      let(:response_callback) {double("callback", :call => nil)}
-      let(:mws) {MWS.new(auth_params.merge(:response_callback => response_callback))}
+      let(:response_callback) {double("response_callback", :call => nil)}
+      let(:request_callback) {double("request_callback", :call => nil)}
+      let(:mws) {MWS.new(auth_params.merge(:response_callback => response_callback,
+                                           :request_callback => request_callback))}
       let(:order_id) {
         # just grab one order id
         # if this doesn't work most things will fail
@@ -70,16 +72,19 @@ describe MWS::API::Order do
 
       it "should be called on list order items" do
         expect(response_callback).to receive(:call)
+        expect(request_callback).to receive(:call)        
         mws.orders.list_order_items :amazon_order_id => order_id
       end
 
       it "should be called on list orders" do
         expect(response_callback).to receive(:call)
+        expect(request_callback).to receive(:call)
         mws.orders.list_orders :last_updated_after => "2012-01-15T13:07:26-05:00"
       end
 
       it "should be called on list order items" do 
         expect(response_callback).to receive(:call)
+        expect(request_callback).to receive(:call)
         mws.orders.list_order_items :amazon_order_id => order_id
       end
     end
