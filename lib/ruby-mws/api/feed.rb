@@ -51,24 +51,22 @@ module MWS
       # @option opts [String] :merchant_order_item_id Internal order line item id      
       def content_for_ack_with(opts={})
         Nokogiri::XML::Builder.new do |xml|
-          xml.root {
-            xml.AmazonEnvelope("xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
-                               "xsi:noNamespaceSchemaLocation" => "amzn-envelope.xsd") { # add attrs here
-              xml.Header {
-                xml.DocumentVersion "1.01"
-                xml.MerchantIdentifier @connection.seller_id
-              }
-              xml.MessageType "OrderAcknowledgement"
-              xml.Message {
-                xml.MessageID "1"
-                xml.OrderAchnowledgement {
-                  xml.AmazonOrderID opts[:amazon_order_id]
-                  xml.MerchantOrderID opts[:merchant_order_id]                  
-                  xml.StatusCode "Success"
-                  xml.Item {
-                    xml.AmazonOrderItemCode opts[:amazon_order_item_code]
-                    xml.MerchantOrderItemID opts[:merchant_order_item_id]
-                  }
+          xml.AmazonEnvelope("xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
+                             "xsi:noNamespaceSchemaLocation" => "amzn-envelope.xsd") { # add attrs here
+            xml.Header {
+              xml.DocumentVersion "1.01"
+              xml.MerchantIdentifier @connection.seller_id
+            }
+            xml.MessageType "OrderAcknowledgement"
+            xml.Message {
+              xml.MessageID "1"
+              xml.OrderAcknowledgement {
+                xml.AmazonOrderID opts[:amazon_order_id]
+                xml.MerchantOrderID opts[:merchant_order_id]                  
+                xml.StatusCode "Success"
+                xml.Item {
+                  xml.AmazonOrderItemCode opts[:amazon_order_item_code]
+                  xml.MerchantOrderItemID opts[:merchant_order_item_id]
                 }
               }
             }
