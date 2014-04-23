@@ -104,8 +104,8 @@ module MWS
               xml.DocumentVersion "1.01"
               xml.MerchantIdentifier @connection.seller_id
             }
+            xml.MessageType "OrderFulfillment"
             opts[:orders].each do |order_hash|
-              xml.MessageType "OrderFulfillment"
               xml.Message {
                 xml.MessageID order_hash[:message_id]
                 xml.OrderFulfillment {

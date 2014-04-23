@@ -119,7 +119,9 @@ describe MWS::API::Feed do
           ids.should_not be_empty
           ids[0].text.should == first_order_id
           ids[1].text.should == second_order_id
-          
+
+
+          body_doc.css('AmazonEnvelope > MessageType').should_not be_empty # should be outside Message
           body_doc.css('AmazonEnvelope Message OrderFulfillment').should_not be_empty
           body_doc.css('AmazonEnvelope Message OrderFulfillment AmazonOrderID').should_not be_empty
           body_doc.css('AmazonEnvelope Message OrderFulfillment FulfillmentDate').first.text.should == fulfillment_date.to_s
