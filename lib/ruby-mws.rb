@@ -37,11 +37,11 @@ end
 
 class String
 
-  def camelize(first_letter_in_uppercase = true)
+  def ruby_mws_camelize(first_letter_in_uppercase = true)
     if first_letter_in_uppercase
       self.to_s.gsub(/\/(.?)/) { "::#{$1.upcase}" }.gsub(/(?:^|_)(.)/) { $1.upcase }
     else
-      self.to_s[0].chr.downcase + camelize(lower_case_and_underscored_word)[1..-1]
+      self.to_s[0].chr.downcase + ruby_mws_camelize(lower_case_and_underscored_word)[1..-1]
     end
   end
 end
@@ -56,6 +56,8 @@ require 'ruby-mws/api/binary_parser'
 require 'ruby-mws/api/base'
 require 'ruby-mws/api/inventory'
 require 'ruby-mws/api/order'
+require 'ruby-mws/api/product'
+require 'ruby-mws/api/feed'
 require 'ruby-mws/api/report'
 require 'ruby-mws/api/query'
 require 'ruby-mws/api/response'

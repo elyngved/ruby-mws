@@ -2,6 +2,7 @@ module MWS
   module API
 
     class Query
+      UNSAFE_PARAMS = [:mods, :aws_access_key_id, :seller_id, :secret_access_key].freeze
 
       def initialize(params)
         @params = params
@@ -26,6 +27,12 @@ module MWS
         "https://" << @params[:host] << @params[:uri] << '?' << build_sorted_query(signature)
       end
 
+      # Strips all the "unsafe" keys from the params instance var
+      # @return [Hash] cleaned params
+      def safe_params
+        @params.reject{|key,_| UNSAFE_PARAMS.include? key.to_sym}
+      end
+
       private
       def build_sorted_query(signature=nil)
         params = @params.dup.delete_if {|k,v| exclude_from_query.include? k}
@@ -34,7 +41,7 @@ module MWS
 
         # hack to capitalize AWS in param names
         # TODO: Allow for multiple marketplace ids
-        params = Hash[params.map{|k,v| [k.camelize.sub(/Aws/,'AWS'), v]}]
+        params = Hash[params.map{|k,v| [k.ruby_mws_camelize.sub(/Aws/,'AWS'), v]}]
 
         params = params.sort.map! { |p| "#{p[0]}=#{process_param(p[1])}" }
         params.join('&')

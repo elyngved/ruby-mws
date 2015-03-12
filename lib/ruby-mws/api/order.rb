@@ -7,7 +7,9 @@ module MWS
         :uri => '/Orders/2011-01-01',
         :version => '2011-01-01',
         :lists => {
-          :order_status => "OrderStatus.Status"
+          :order_status => "OrderStatus.Status",
+          :marketplace_id => "MarketplaceId.Id"
+
         },
         :mods => [
           lambda {|r| r.orders = r.orders.order if r.orders}
@@ -17,6 +19,9 @@ module MWS
         :verb => :get,
         :uri => '/Orders/2011-01-01',
         :version => '2011-01-01',
+        :lists => {
+          :marketplace_id => "MarketplaceId.Id"
+        },
         :mods => [
           lambda {|r| r.order_items = [r.order_items.order_item].flatten}
         ]
@@ -26,7 +31,8 @@ module MWS
         :uri => '/Orders/2011-01-01',
         :version => '2011-01-01',
         :lists => {
-          :amazon_order_id => "AmazonOrderId.Id"
+          :amazon_order_id => "AmazonOrderId.Id",
+          :marketplace_id => "MarketplaceId.Id"
         },
         :mods => [
           lambda {|r| r.orders = [r.orders.order].flatten}
