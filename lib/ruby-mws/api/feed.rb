@@ -6,6 +6,7 @@ module MWS
     class Feed < Base
       ORDER_ACK = '_POST_ORDER_ACKNOWLEDGEMENT_DATA_'
       SHIP_ACK = '_POST_ORDER_FULFILLMENT_DATA_'
+      PRODUCT_ACK = '_POST_PRODUCT_DATA_'
 
       # POSTs a request to the submit feed action of the feeds api
       #
@@ -21,6 +22,8 @@ module MWS
                  content_for_ack_with(content_params)
                when SHIP_ACK
                  content_for_ship_with(content_params)
+               when PRODUCT_ACK
+                 content_for_product_with(content_params)
                end
         query_params = {:feed_type => type}
         options = {
@@ -49,7 +52,62 @@ module MWS
       # @option opts [String] :amazon_order_item_code ID of the specific item in the order
       # @option opts [String] :amazon_order_id ID of the order on amazon's side
       # @option opts [String] :merchant_order_id Internal order id
-      # @option opts [String] :merchant_order_item_id Internal order line item id      
+      # @option opts [String] :merchant_order_item_id Internal order line item id
+      def content_for_product_with(opts={})
+        Nokogiri::XML::Builder.new do |xml|
+          xml.AmazonEnvelope("xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
+                             "xsi:noNamespaceSchemaLocation" => "amzn-envelope.xsd") { # add attrs here
+            xml.Header {
+              xml.DocumentVersion "1.01"
+              xml.MerchantIdentifier @connection.seller_id
+            }
+            xml.MessageType "Product"
+            xml.PurgeAndReplace opts[:purge_and_replace]
+            xml.Message {
+              xml.MessageID "1"
+              xml.OperationType opts[:operation_type]
+              xml.Product {
+                xml.SKU opts[:isbn]
+                xml.StandardProductID
+                  xml.Type  "ISBN"
+                  xml.Value opts[:isbn]
+                xml.ItemPackageQuantity "1"
+                xml.NumberOfItems "1"
+                xml.Condition opts[:condition]
+                xml.DescriptionData
+                  xml.Title opts[:title]
+                  xml.Manufacturer "Blurb"
+                  xml.Brand opts[:brand]
+                  xml.Description opts[:description]
+                  xml.SearchTerms opts[:search_terms2]
+                  xml.SearchTerms opts[:search_terms3]
+                  xml.SearchTerms opts[:search_terms4]
+                  xml.SearchTerms opts[:search_terms5]
+                  xml.MSRP("currency" => opts[:currency]) opts[:standard_price]
+                  xml.ItemType opts[:item_type]
+                xml.ProductData {
+                  xml.Books
+                    xml.ProductType
+                      xml.Author opts[:authors]
+                      xml.Binding opts[:binding]
+                      xml.Edition opts[:edition]
+                      xml.PublicationDate opts[:publication_date]
+                      xml.Quantity opts[:quantity]
+                      xml.WillShipInternationally opts[:will_ship_internationally]
+                      xml.MainImageUrl opts[:main_image_url]
+                      xml.Pages opts[:pages]
+                      xml.PackageWidth opts[:package_width]
+                      xml.PackageHeight opts[:package_height]
+                      xml.PackageLength opts[:package_length]
+                      xml.PackageDimension("unitOfMeasure" => 'IN')
+                      xml.Subject opts[:subject]
+                }
+              }
+            }
+          }
+        end.to_xml
+      end
+
       def content_for_ack_with(opts={})
         Nokogiri::XML::Builder.new do |xml|
           xml.AmazonEnvelope("xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
@@ -63,7 +121,7 @@ module MWS
               xml.MessageID "1"
               xml.OrderAcknowledgement {
                 xml.AmazonOrderID opts[:amazon_order_id]
-                xml.MerchantOrderID opts[:merchant_order_id]                  
+                xml.MerchantOrderID opts[:merchant_order_id]
                 xml.StatusCode "Success"
                 xml.Item {
                   xml.AmazonOrderItemCode opts[:amazon_order_item_code]
@@ -74,6 +132,7 @@ module MWS
           }
         end.to_xml
       end
+
 
       # Returns a string containing the shipping achnowledgement xml
       #
@@ -93,7 +152,7 @@ module MWS
       #   @option opts [String] :tracking_number (optional) shipper tracking number
       #   @option opts [String] :fulfillment_date (optional) DateTime the order was fulfilled
       #     defaults to the current time
-      #   @option opts [String] :merchant_order_item_id Internal order line item id            
+      #   @option opts [String] :merchant_order_item_id Internal order line item id
       def content_for_ship_with(opts={})
         fulfillment_date = opts[:fulfillment_date] || DateTime.now
 
