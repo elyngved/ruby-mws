@@ -22,7 +22,7 @@ module MWS
                  content_for_ack_with(content_params)
                when SHIP_ACK
                  content_for_ship_with(content_params)
-               when PRODUCT_ACK
+               when PRODUCT_LIST
                  content_for_product_with(content_params)
                end
         query_params = {:feed_type => type}
@@ -79,10 +79,11 @@ module MWS
                   xml.Title opts[:title]
                   xml.Manufacturer "Blurb"
                   xml.Description opts[:description]
-                  xml.SearchTerms opts[:search_terms2]
-                  xml.SearchTerms opts[:search_terms3]
-                  xml.SearchTerms opts[:search_terms4]
-                  xml.SearchTerms opts[:search_terms5]
+                  xml.SearchTerms opts[:search_terms][0]
+                  xml.SearchTerms opts[:search_terms][1]
+                  xml.SearchTerms opts[:search_terms][2]
+                  xml.SearchTerms opts[:search_terms][3]
+                  xml.SearchTerms opts[:search_terms][4]
                   xml.MSRP(:currency => opts[:currency]){ xml.text(opts[:standard_price]) }
                 }
                   xml.ProductData {

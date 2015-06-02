@@ -74,11 +74,7 @@ describe MWS::API::Feed do
         :title => 'The Hobbit',
         :description => 'The Hobbit, or There and Back Again is a fantasy novel.',
         :authors => 'J. R. R. Tolkien',
-        :search_terms1 => 'hobbit',
-        :search_terms2 => 'fantasy',
-        :search_terms3 => 'novel',
-        :search_terms4 => 'story',
-        :search_terms5 => 'book',
+        :search_terms => %w(hobbit fantasy novel story book),
         :currency => 'US',
         :standard_price => '290',
         :binding => 'Hard Cover',
@@ -110,7 +106,6 @@ describe MWS::API::Feed do
         MWS::API::Feed.should_receive(:post) do |uri, hash|
           hash.should include(:body)
           body = hash[:body]
-          
           body_doc = Nokogiri.parse(body)
           body_doc.css('AmazonEnvelope MessageType').text.should == "OrderAcknowledgement"
           body_doc.css('AmazonEnvelope Message OrderAcknowledgement').should_not be_empty
@@ -182,10 +177,7 @@ describe MWS::API::Feed do
         MWS::API::Feed.should_receive(:post) do |uri, product_hash|
           product_hash.should include(:body)
           body = product_hash[:body]
-
           body_doc = Nokogiri.parse(body)
-
-
           body_doc.css('AmazonEnvelope Message Product SKU').text.should == "1234567890"
           body_doc.css('AmazonEnvelope MessageType').length.should == 1 # multiple types was causing problems
           body_doc.css('AmazonEnvelope PurgeAndReplace').text.should == "false"
@@ -196,6 +188,7 @@ describe MWS::API::Feed do
           body_doc.css('AmazonEnvelope Message Product DescriptionData Title').text.should == "The Hobbit"
           body_doc.css('AmazonEnvelope Message Product DescriptionData Manufacturer').text.should == "Blurb"
           body_doc.css('AmazonEnvelope Message Product DescriptionData MSRP').text.should == "290"
+          body_doc.css('AmazonEnvelope Message Product DescriptionData SearchTerms').text.should == "hobbit,fantasy,novel,story,book"
           body_doc.css('AmazonEnvelope Message Product ProductData Books ProductType Author').text.should == "J. R. R. Tolkien"
         end
         response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_ACK, product_hash)
