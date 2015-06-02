@@ -73,24 +73,22 @@ module MWS
                   xml.Value opts[:isbn]
                 xml.ItemPackageQuantity "1"
                 xml.NumberOfItems "1"
-                xml.Condition opts[:condition]
+                xml.Condition "New"
                 xml.DescriptionData
                   xml.Title opts[:title]
                   xml.Manufacturer "Blurb"
-                  xml.Brand opts[:brand]
                   xml.Description opts[:description]
                   xml.SearchTerms opts[:search_terms2]
                   xml.SearchTerms opts[:search_terms3]
                   xml.SearchTerms opts[:search_terms4]
                   xml.SearchTerms opts[:search_terms5]
                   xml.MSRP("currency" => opts[:currency]) opts[:standard_price]
-                  xml.ItemType opts[:item_type]
                 xml.ProductData {
                   xml.Books
                     xml.ProductType
                       xml.Author opts[:authors]
+                      xml.Publisher opts[:publisher]
                       xml.Binding opts[:binding]
-                      xml.Edition opts[:edition]
                       xml.PublicationDate opts[:publication_date]
                       xml.Quantity opts[:quantity]
                       xml.WillShipInternationally opts[:will_ship_internationally]
@@ -99,7 +97,7 @@ module MWS
                       xml.PackageWidth opts[:package_width]
                       xml.PackageHeight opts[:package_height]
                       xml.PackageLength opts[:package_length]
-                      xml.PackageDimension("unitOfMeasure" => 'IN')
+                      xml.PackageDimension("unitOfMeasure" => "IN")
                       xml.Subject opts[:subject]
                 }
               }

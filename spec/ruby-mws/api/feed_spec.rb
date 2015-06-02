@@ -66,6 +66,36 @@ describe MWS::API::Feed do
       :merchant_order_item_id => merchant_order_item_code
     }}
 
+    let(:product_hash) {
+      {
+        :purge_and_replace => false,
+        :operation_type => 'Update',
+        :isbn => '1234567890',
+        :title => 'The Hobbit',
+        :description => 'The Hobbit, or There and Back Again is a fantasy novel.',
+        :authors => 'J. R. R. Tolkien',
+        :search_terms1 => 'hobbit',
+        :search_terms2 => 'fantasy',
+        :search_terms3 => 'novel',
+        :search_terms4 => 'story',
+        :search_terms5 => 'book',
+        :currency => 'US',
+        :standard_price => '290',
+        :binding => 'Hard Cover',
+        :publisher => 'Blurb',
+        :publication_date => '2015-05-20',
+        :quantity => 10,
+        :item_condition => 'New',
+        :will_ship_internationally => 'y',
+        :main_image_url => 'http://bookshow.blurb.com/bookshow/cache/P8851942/uhg/cover_2.jpeg',
+        :pages => 100,
+        :package_width => 12,
+        :package_height => 12,
+        :package_length => 1.05,
+        :subject => 'Subject'
+      }
+    }
+
     describe "submit_feed" do
       it "should be able to ack an order" do
         response = mws.feeds.submit_feed(MWS::API::Feed::ORDER_ACK, order_hash)
@@ -139,6 +169,38 @@ describe MWS::API::Feed do
         end
         response = mws.feeds.submit_feed(MWS::API::Feed::SHIP_ACK, shipment_hash)
       end
+
+      it 'should be able to ack the product' do
+        response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_ACK, product_hash)
+        response.feed_submission_info.should_not be_nil
+        info = response.feed_submission_info
+        info.feed_processing_status.should == "_SUBMITTED_"
+        info.feed_type.should == MWS::API::Feed::PRODUCT_ACK
+      end
+
+      it "should create the correct body for product" do
+        MWS::API::Feed.should_receive(:post) do |uri, hash|
+          hash.should include(:body)
+          body = hash[:body]
+
+          body_doc = Nokogiri.parse(body)
+          isbn = body_doc.css('AmazonEnvelope Message Product SKU')
+
+          isbn.text.should == "1234567890"
+
+          body_doc.css('AmazonEnvelope MessageType').length.should == 1 # multiple types was causing problems
+          body_doc.css('AmazonEnvelope Message Product').should_not be_empty
+          body_doc.css('AmazonEnvelope Message Product SKU').should_not be_empty
+          body_doc.css('AmazonEnvelope Message Product StandardProductID Value').text.should == "1234567890"
+          body_doc.css('AmazonEnvelope Message Product Condition').text.should == "New"
+          body_doc.css('AmazonEnvelope Message Product DescriptionData Title').text.should == "The Hobbit"
+          body_doc.css('AmazonEnvelope Message Product DescriptionData Manufacturer').text.should == "Blurb"
+          body_doc.css('AmazonEnvelope Message Product DescriptionData MSRP').text.should == "290"
+          body_doc.css('AmazonEnvelope Message Product ProductData Books ProductType Author').text.should == "J. R. R. Tolkien"
+        end
+        response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_ACK, product_hash)
+      end
+
     end
     
     describe "callback block" do
