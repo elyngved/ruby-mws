@@ -179,16 +179,16 @@ describe MWS::API::Feed do
       end
 
       it "should create the correct body for product" do
-        MWS::API::Feed.should_receive(:post) do |uri, hash|
-          hash.should include(:body)
-          body = hash[:body]
+        MWS::API::Feed.should_receive(:post) do |uri, product_hash|
+          product_hash.should include(:body)
+          body = product_hash[:body]
 
           body_doc = Nokogiri.parse(body)
-          isbn = body_doc.css('AmazonEnvelope Message Product SKU')
 
-          isbn.text.should == "1234567890"
 
+          body_doc.css('AmazonEnvelope Message Product SKU').text.should == "1234567890"
           body_doc.css('AmazonEnvelope MessageType').length.should == 1 # multiple types was causing problems
+          body_doc.css('AmazonEnvelope PurgeAndReplace').text.should == "false"
           body_doc.css('AmazonEnvelope Message Product').should_not be_empty
           body_doc.css('AmazonEnvelope Message Product SKU').should_not be_empty
           body_doc.css('AmazonEnvelope Message Product StandardProductID Value').text.should == "1234567890"

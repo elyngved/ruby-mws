@@ -68,13 +68,14 @@ module MWS
               xml.OperationType opts[:operation_type]
               xml.Product {
                 xml.SKU opts[:isbn]
-                xml.StandardProductID
+                xml.StandardProductID {
                   xml.Type  "ISBN"
                   xml.Value opts[:isbn]
+                }
                 xml.ItemPackageQuantity "1"
                 xml.NumberOfItems "1"
                 xml.Condition "New"
-                xml.DescriptionData
+                xml.DescriptionData {
                   xml.Title opts[:title]
                   xml.Manufacturer "Blurb"
                   xml.Description opts[:description]
@@ -82,10 +83,11 @@ module MWS
                   xml.SearchTerms opts[:search_terms3]
                   xml.SearchTerms opts[:search_terms4]
                   xml.SearchTerms opts[:search_terms5]
-                  xml.MSRP("currency" => opts[:currency]) opts[:standard_price]
-                xml.ProductData {
-                  xml.Books
-                    xml.ProductType
+                  xml.MSRP(:currency => opts[:currency]){ xml.text(opts[:standard_price]) }
+                }
+                  xml.ProductData {
+                  xml.Books {
+                    xml.ProductType {
                       xml.Author opts[:authors]
                       xml.Publisher opts[:publisher]
                       xml.Binding opts[:binding]
@@ -99,6 +101,8 @@ module MWS
                       xml.PackageLength opts[:package_length]
                       xml.PackageDimension("unitOfMeasure" => "IN")
                       xml.Subject opts[:subject]
+                    }
+                  }
                 }
               }
             }
