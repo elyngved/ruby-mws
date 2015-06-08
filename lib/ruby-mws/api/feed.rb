@@ -6,7 +6,7 @@ module MWS
     class Feed < Base
       ORDER_ACK = '_POST_ORDER_ACKNOWLEDGEMENT_DATA_'
       SHIP_ACK = '_POST_ORDER_FULFILLMENT_DATA_'
-      PRODUCT_ACK = '_POST_PRODUCT_DATA_'
+      PRODUCT_LIST = '_POST_PRODUCT_DATA_'
 
       # POSTs a request to the submit feed action of the feeds api
       #
@@ -23,7 +23,7 @@ module MWS
                when SHIP_ACK
                  content_for_ship_with(content_params)
                when PRODUCT_LIST
-                 content_for_product_with(content_params)
+                 content_for_product_list(content_params)
                end
         query_params = {:feed_type => type}
         options = {
@@ -53,7 +53,7 @@ module MWS
       # @option opts [String] :amazon_order_id ID of the order on amazon's side
       # @option opts [String] :merchant_order_id Internal order id
       # @option opts [String] :merchant_order_item_id Internal order line item id
-      def content_for_product_with(opts={})
+      def content_for_product_list(opts={})
         Nokogiri::XML::Builder.new do |xml|
           xml.AmazonEnvelope("xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
                              "xsi:noNamespaceSchemaLocation" => "amzn-envelope.xsd") { # add attrs here
@@ -64,7 +64,7 @@ module MWS
             xml.MessageType "Product"
             xml.PurgeAndReplace opts[:purge_and_replace]
             xml.Message {
-              xml.MessageID "1"
+              xml.MessageID opts[:message_id]
               xml.OperationType opts[:operation_type]
               xml.Product {
                 xml.SKU opts[:isbn]
@@ -72,38 +72,40 @@ module MWS
                   xml.Type  "ISBN"
                   xml.Value opts[:isbn]
                 }
-                xml.ItemPackageQuantity "1"
-                xml.NumberOfItems "1"
-                xml.Condition "New"
+                xml.Condition {
+                  xml.ConditionType opts[:item_condition_type]
+                }
+                xml.ItemPackageQuantity opts[:item_package_quantity]
+                xml.NumberOfItems opts[:number_of_items]
                 xml.DescriptionData {
                   xml.Title opts[:title]
-                  xml.Manufacturer "Blurb"
+                  xml.Brand opts[:brand]
                   xml.Description opts[:description]
+                  xml.BulletPoint opts[:bullet_point]
+                  xml.PackageDimensions {
+                    xml.Length(:unitOfMeasure => opts[:unit_of_measure]) { xml.text(opts[:package_length]) }
+                    xml.Width(:unitOfMeasure => opts[:unit_of_measure]) { xml.text(opts[:package_width]) }
+                    xml.Height(:unitOfMeasure => opts[:unit_of_measure]) { xml.text(opts[:package_height]) }
+                  }
+                  xml.MSRP(:currency => opts[:currency]){ xml.text(opts[:standard_price]) }
+                  xml.Manufacturer opts[:manufacturer]
                   xml.SearchTerms opts[:search_terms][0]
                   xml.SearchTerms opts[:search_terms][1]
                   xml.SearchTerms opts[:search_terms][2]
                   xml.SearchTerms opts[:search_terms][3]
                   xml.SearchTerms opts[:search_terms][4]
-                  xml.MSRP(:currency => opts[:currency]){ xml.text(opts[:standard_price]) }
                 }
                   xml.ProductData {
-                  xml.Books {
-                    xml.ProductType {
-                      xml.Author opts[:authors]
-                      xml.Publisher opts[:publisher]
-                      xml.Binding opts[:binding]
-                      xml.PublicationDate opts[:publication_date]
-                      xml.Quantity opts[:quantity]
-                      xml.WillShipInternationally opts[:will_ship_internationally]
-                      xml.MainImageUrl opts[:main_image_url]
-                      xml.Pages opts[:pages]
-                      xml.PackageWidth opts[:package_width]
-                      xml.PackageHeight opts[:package_height]
-                      xml.PackageLength opts[:package_length]
-                      xml.PackageDimension("unitOfMeasure" => "IN")
-                      xml.Subject opts[:subject]
+                    xml.Books {
+                      xml.ProductType {
+                        xml.BooksMisc {
+                          xml.Author opts[:authors]
+                          xml.Binding opts[:binding]
+                          xml.PublicationDate opts[:publication_date]
+                          xml.Subject opts[:subject]
+                        }
+                      }
                     }
-                  }
                 }
               }
             }

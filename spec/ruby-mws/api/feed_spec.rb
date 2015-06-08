@@ -69,26 +69,31 @@ describe MWS::API::Feed do
     let(:product_hash) {
       {
         :purge_and_replace => false,
+        :message_id => 1,
         :operation_type => 'Update',
-        :isbn => '1234567890',
+        :isbn => '9781320717869',
+        :item_condition_type => 'New',
+        :item_package_quantity => 1,
+        :number_of_items => 1,
         :title => 'The Hobbit',
+        :brand => 'Blurb',
         :description => 'The Hobbit, or There and Back Again is a fantasy novel.',
-        :authors => 'J. R. R. Tolkien',
-        :search_terms => %w(hobbit fantasy novel story book),
-        :currency => 'US',
+        :bullet_point => 'Bullet point',
+        :unit_of_measure => 'IN',
+        :package_length => 14,
+        :package_width => 12,
+        :package_height => 1,
+        :currency => 'USD',
         :standard_price => '290',
-        :binding => 'Hard Cover',
-        :publisher => 'Blurb',
-        :publication_date => '2015-05-20',
-        :quantity => 10,
-        :item_condition => 'New',
+        :manufacturer => 'Blurb',
+        :search_terms => %w(hobbit fantasy novel story book),
+        :authors => 'J. R. R. Tolkien',
+        :binding => 'Hardcover',
+        :publication_date => '2014-01-31T11:03:11',
+        :subject => 'Subject',
         :will_ship_internationally => 'y',
         :main_image_url => 'http://bookshow.blurb.com/bookshow/cache/P8851942/uhg/cover_2.jpeg',
-        :pages => 100,
-        :package_width => 12,
-        :package_height => 12,
-        :package_length => 1.05,
-        :subject => 'Subject'
+        :pages => 100
       }
     }
 
@@ -166,11 +171,11 @@ describe MWS::API::Feed do
       end
 
       it 'should be able to ack the product' do
-        response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_ACK, product_hash)
+        response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST, product_hash)
         response.feed_submission_info.should_not be_nil
         info = response.feed_submission_info
         info.feed_processing_status.should == "_SUBMITTED_"
-        info.feed_type.should == MWS::API::Feed::PRODUCT_ACK
+        info.feed_type.should == MWS::API::Feed::PRODUCT_LIST
       end
 
       it "should create the correct body for product" do
@@ -178,20 +183,28 @@ describe MWS::API::Feed do
           product_hash.should include(:body)
           body = product_hash[:body]
           body_doc = Nokogiri.parse(body)
-          body_doc.css('AmazonEnvelope Message Product SKU').text.should == "1234567890"
+
+          body_doc.css('AmazonEnvelope Message Product SKU').text.should == "9781320717869"
           body_doc.css('AmazonEnvelope MessageType').length.should == 1 # multiple types was causing problems
           body_doc.css('AmazonEnvelope PurgeAndReplace').text.should == "false"
           body_doc.css('AmazonEnvelope Message Product').should_not be_empty
           body_doc.css('AmazonEnvelope Message Product SKU').should_not be_empty
-          body_doc.css('AmazonEnvelope Message Product StandardProductID Value').text.should == "1234567890"
-          body_doc.css('AmazonEnvelope Message Product Condition').text.should == "New"
+          body_doc.css('AmazonEnvelope Message Product StandardProductID Value').text.should == "9781320717869"
+          body_doc.css('AmazonEnvelope Message Product Condition ConditionType').text.should == "New"
           body_doc.css('AmazonEnvelope Message Product DescriptionData Title').text.should == "The Hobbit"
           body_doc.css('AmazonEnvelope Message Product DescriptionData Manufacturer').text.should == "Blurb"
           body_doc.css('AmazonEnvelope Message Product DescriptionData MSRP').text.should == "290"
-          body_doc.css('AmazonEnvelope Message Product DescriptionData SearchTerms').text.should == "hobbit,fantasy,novel,story,book"
+          body_doc.css('AmazonEnvelope Message Product DescriptionData MSRP').first.attributes["currency"].value.should == "USD"
+          body_doc.css('AmazonEnvelope Message Product DescriptionData SearchTerms').first.text.should == "hobbit"
+          body_doc.css('AmazonEnvelope Message Product DescriptionData SearchTerms').last.text.should == "book"
+          body_doc.css('AmazonEnvelope Message Product DescriptionData PackageDimensions Length').text.should == "14"
+          body_doc.css('AmazonEnvelope Message Product DescriptionData PackageDimensions Width').text.should == "12"
+          body_doc.css('AmazonEnvelope Message Product DescriptionData PackageDimensions Height').text.should == "1"
+          body_doc.css('AmazonEnvelope Message Product DescriptionData PackageDimensions Length').first.attributes["unitOfMeasure"].value.should == "IN"
           body_doc.css('AmazonEnvelope Message Product ProductData Books ProductType Author').text.should == "J. R. R. Tolkien"
+          body_doc.css('AmazonEnvelope Message Product ProductData Books ProductType Binding').text.should == "Hardcover"
         end
-        response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_ACK, product_hash)
+        response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST, product_hash)
       end
 
     end
