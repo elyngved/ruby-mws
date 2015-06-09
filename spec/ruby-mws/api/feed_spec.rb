@@ -66,6 +66,17 @@ describe MWS::API::Feed do
       :merchant_order_item_id => merchant_order_item_code
     }}
 
+    let(:product_image_hash) {
+      {
+          :purge_and_replace => false,
+          :message_id => 1,
+          :operation_type => 'Update',
+          :isbn => '9781320717869',
+          :image_type => 'Main',
+          :image_location => 'https://www-techinasiacom.netdna-ssl.com/wp-content/uploads/2012/05/funny-cat.jpg'
+      }
+    }
+
     describe "submit_feed" do
       it "should be able to ack an order" do
         response = mws.feeds.submit_feed(MWS::API::Feed::ORDER_ACK, order_hash)
@@ -138,6 +149,34 @@ describe MWS::API::Feed do
           body_doc.css('AmazonEnvelope Message Item AmazonOrderItemCode')[3].text.should == fourth_item_code
         end
         response = mws.feeds.submit_feed(MWS::API::Feed::SHIP_ACK, shipment_hash)
+      end
+
+      context "#product_image_data" do
+        it 'should be able to set the image for a product'  do
+          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST_IMAGE, product_image_hash)
+          response.feed_submission_info.should_not be_nil
+
+          info = response.feed_submission_info
+          info.feed_processing_status.should == "_SUBMITTED_"
+          info.feed_type.should == MWS::API::Feed::PRODUCT_LIST_IMAGE
+        end
+
+        it "should create the correct body for product" do
+          MWS::API::Feed.should_receive(:post) do |uri, product_image_hash|
+            product_image_hash.should include(:body)
+            body = product_image_hash[:body]
+            body_doc = Nokogiri.parse(body)
+
+            body_doc.css('AmazonEnvelope Message ProductImage SKU').should_not be_empty
+            body_doc.css('AmazonEnvelope Message ProductImage SKU').text.should == "9781320717869"
+            body_doc.css('AmazonEnvelope MessageType').length.should == 1 # multiple types was causing problems
+            body_doc.css('AmazonEnvelope PurgeAndReplace').text.should == "false"
+            body_doc.css('AmazonEnvelope Message ProductImage').should_not be_empty
+            body_doc.css('AmazonEnvelope Message ProductImage ImageType').text.should == "Main"
+            body_doc.css('AmazonEnvelope Message ProductImage ImageLocation').text.should == "https://www-techinasiacom.netdna-ssl.com/wp-content/uploads/2012/05/funny-cat.jpg"
+          end
+          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST_IMAGE, product_image_hash)
+        end
       end
     end
     

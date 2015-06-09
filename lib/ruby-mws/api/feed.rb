@@ -6,6 +6,7 @@ module MWS
     class Feed < Base
       ORDER_ACK = '_POST_ORDER_ACKNOWLEDGEMENT_DATA_'
       SHIP_ACK = '_POST_ORDER_FULFILLMENT_DATA_'
+      PRODUCT_LIST_IMAGE = '_POST_PRODUCT_IMAGE_DATA_'
 
       # POSTs a request to the submit feed action of the feeds api
       #
@@ -21,6 +22,8 @@ module MWS
                  content_for_ack_with(content_params)
                when SHIP_ACK
                  content_for_ship_with(content_params)
+               when PRODUCT_LIST_IMAGE
+                 content_for_product_list_image(content_params)
                end
         query_params = {:feed_type => type}
         options = {
@@ -43,6 +46,29 @@ module MWS
       end
 
       private
+
+      def content_for_product_list_image(opts={})
+        Nokogiri::XML::Builder.new do |xml|
+          xml.AmazonEnvelope("xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
+                             "xsi:noNamespaceSchemaLocation" => "amzn-envelope.xsd") { # add attrs here
+            xml.Header {
+              xml.DocumentVersion "1.01"
+              xml.MerchantIdentifier @connection.seller_id
+            }
+            xml.MessageType "ProductImage"
+            xml.PurgeAndReplace opts[:purge_and_replace]
+            xml.Message {
+              xml.MessageID opts[:message_id]
+              xml.OperationType opts[:operation_type]
+              xml.ProductImage {
+                xml.SKU opts[:isbn]
+                xml.ImageType opts[:image_type]
+                xml.ImageLocation opts[:image_location]
+              }
+            }
+          }
+        end.to_xml
+      end
       # Returns a string containing the order acknowledgement xml
       #
       # @param opts [Hash{Symbol => String}] contains
