@@ -78,7 +78,6 @@ describe MWS::API::Feed do
         :title => 'The Hobbit',
         :brand => 'Blurb',
         :description => 'The Hobbit, or There and Back Again is a fantasy novel.',
-        :bullet_point => 'Bullet point',
         :unit_of_measure => 'IN',
         :package_length => 14,
         :package_width => 12,
@@ -90,9 +89,6 @@ describe MWS::API::Feed do
         :authors => 'J. R. R. Tolkien',
         :binding => 'Hardcover',
         :publication_date => '2014-01-31T11:03:11',
-        :subject => 'Subject',
-        :will_ship_internationally => 'y',
-        :main_image_url => 'http://bookshow.blurb.com/bookshow/cache/P8851942/uhg/cover_2.jpeg',
         :pages => 100
       }
     }

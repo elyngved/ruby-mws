@@ -81,7 +81,6 @@ module MWS
                   xml.Title opts[:title]
                   xml.Brand opts[:brand]
                   xml.Description opts[:description]
-                  xml.BulletPoint opts[:bullet_point]
                   xml.PackageDimensions {
                     xml.Length(:unitOfMeasure => opts[:unit_of_measure]) { xml.text(opts[:package_length]) }
                     xml.Width(:unitOfMeasure => opts[:unit_of_measure]) { xml.text(opts[:package_width]) }
@@ -89,11 +88,9 @@ module MWS
                   }
                   xml.MSRP(:currency => opts[:currency]){ xml.text(opts[:standard_price]) }
                   xml.Manufacturer opts[:manufacturer]
-                  xml.SearchTerms opts[:search_terms][0]
-                  xml.SearchTerms opts[:search_terms][1]
-                  xml.SearchTerms opts[:search_terms][2]
-                  xml.SearchTerms opts[:search_terms][3]
-                  xml.SearchTerms opts[:search_terms][4]
+                  opts[:search_terms].each do |search_term|
+                    xml.SearchTerms search_term
+                  end
                 }
                   xml.ProductData {
                     xml.Books {
@@ -102,7 +99,6 @@ module MWS
                           xml.Author opts[:authors]
                           xml.Binding opts[:binding]
                           xml.PublicationDate opts[:publication_date]
-                          xml.Subject opts[:subject]
                         }
                       }
                     }
