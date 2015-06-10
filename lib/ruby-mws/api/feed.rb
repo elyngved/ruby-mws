@@ -50,6 +50,7 @@ module MWS
       # @option opts [String] :amazon_order_id ID of the order on amazon's side
       # @option opts [String] :merchant_order_id Internal order id
       # @option opts [String] :merchant_order_item_id Internal order line item id      
+      # @option opts [String] :status_code (optional) Ack status code. Defaults to 'Success'
       def content_for_ack_with(opts={})
         Nokogiri::XML::Builder.new do |xml|
           xml.AmazonEnvelope("xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
@@ -64,7 +65,7 @@ module MWS
               xml.OrderAcknowledgement {
                 xml.AmazonOrderID opts[:amazon_order_id]
                 xml.MerchantOrderID opts[:merchant_order_id]                  
-                xml.StatusCode "Success"
+                xml.StatusCode opts[:status_code] || "Success"
                 xml.Item {
                   xml.AmazonOrderItemCode opts[:amazon_order_item_code]
                   xml.MerchantOrderItemID opts[:merchant_order_item_id]
