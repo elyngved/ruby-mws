@@ -63,48 +63,50 @@ module MWS
             }
             xml.MessageType "Product"
             xml.PurgeAndReplace opts[:purge_and_replace]
-            xml.Message {
-              xml.MessageID opts[:message_id]
-              xml.OperationType opts[:operation_type]
-              xml.Product {
-                xml.SKU opts[:isbn]
-                xml.StandardProductID {
-                  xml.Type  "ISBN"
-                  xml.Value opts[:isbn]
-                }
-                xml.Condition {
-                  xml.ConditionType opts[:item_condition_type]
-                }
-                xml.ItemPackageQuantity opts[:item_package_quantity]
-                xml.NumberOfItems opts[:number_of_items]
-                xml.DescriptionData {
-                  xml.Title opts[:title]
-                  xml.Brand opts[:brand]
-                  xml.Description opts[:description]
-                  xml.PackageDimensions {
-                    xml.Length(:unitOfMeasure => opts[:unit_of_measure]) { xml.text(opts[:package_length]) }
-                    xml.Width(:unitOfMeasure => opts[:unit_of_measure]) { xml.text(opts[:package_width]) }
-                    xml.Height(:unitOfMeasure => opts[:unit_of_measure]) { xml.text(opts[:package_height]) }
+            opts[:entries].each do |entry_hash|
+              xml.Message {
+                xml.MessageID entry_hash[:message_id]
+                xml.OperationType entry_hash[:operation_type]
+                xml.Product {
+                  xml.SKU entry_hash[:isbn]
+                  xml.StandardProductID {
+                    xml.Type  "ISBN"
+                    xml.Value entry_hash[:isbn]
                   }
-                  xml.MSRP(:currency => opts[:currency]){ xml.text(opts[:standard_price]) }
-                  xml.Manufacturer opts[:manufacturer]
-                  opts[:search_terms].each do |search_term|
-                    xml.SearchTerms search_term
-                  end
-                }
-                  xml.ProductData {
-                    xml.Books {
-                      xml.ProductType {
-                        xml.BooksMisc {
-                          xml.Author opts[:authors]
-                          xml.Binding opts[:binding]
-                          xml.PublicationDate opts[:publication_date]
+                  xml.Condition {
+                    xml.ConditionType entry_hash[:item_condition_type]
+                  }
+                  xml.ItemPackageQuantity entry_hash[:item_package_quantity]
+                  xml.NumberOfItems entry_hash[:number_of_items]
+                  xml.DescriptionData {
+                    xml.Title entry_hash[:title]
+                    xml.Brand entry_hash[:brand]
+                    xml.Description entry_hash[:description]
+                    xml.PackageDimensions {
+                      xml.Length(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_length]) }
+                      xml.Width(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_width]) }
+                      xml.Height(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_height]) }
+                    }
+                    xml.MSRP(:currency => entry_hash[:currency]){ xml.text(entry_hash[:standard_price]) }
+                    xml.Manufacturer entry_hash[:manufacturer]
+                    entry_hash[:search_terms].each do |search_term|
+                      xml.SearchTerms search_term
+                    end
+                  }
+                    xml.ProductData {
+                      xml.Books {
+                        xml.ProductType {
+                          xml.BooksMisc {
+                            xml.Author entry_hash[:authors]
+                            xml.Binding entry_hash[:binding]
+                            xml.PublicationDate entry_hash[:publication_date]
+                          }
                         }
                       }
-                    }
+                  }
                 }
               }
-            }
+            end
           }
         end.to_xml
       end
