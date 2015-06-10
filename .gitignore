@@ -7,3 +7,4 @@ spec/credentials.yml
 spec/fixtures/ephemeral_response/*
 .rvmrc
 .idea
+.idea/*
