@@ -71,6 +71,8 @@ describe MWS::API::Feed do
           :entries => [ product_hash_1, product_hash_2 ]
       }
     }
+    let(:five_taggings) {{:taggings=>[{:tag_name=>"layne mcdonald"}, {:tag_name=>"how the man became the moon"}, {:tag_name=>"team work"}, {:tag_name=>"kindness to others"}, {:tag_name=>"friendship"}]}}
+    let(:without_taggings) {{:taggings=>[]}}
 
     let(:product_hash_1) {
       {
@@ -90,7 +92,7 @@ describe MWS::API::Feed do
         :currency => 'USD',
         :standard_price => '290',
         :manufacturer => 'Blurb',
-        :search_terms => %w(hobbit fantasy novel story book),
+        :search_terms => five_taggings,
         :authors => 'J. R. R. Tolkien',
         :binding => 'Hardcover',
         :publication_date => '2014-01-31T11:03:11',
@@ -116,7 +118,7 @@ describe MWS::API::Feed do
           :currency => 'USD',
           :standard_price => '390',
           :manufacturer => 'Blurb',
-          :search_terms => %w(hobbit2 fantasy novel story sequel),
+          :search_terms => without_taggings,
           :authors => 'J. R. R. Tolkien',
           :binding => 'Hardcover',
           :publication_date => '2016-01-31T11:03:11',
@@ -228,9 +230,12 @@ describe MWS::API::Feed do
           body_doc.css('AmazonEnvelope Message Product DescriptionData MSRP')[0].text.should == "290"
           body_doc.css('AmazonEnvelope Message Product DescriptionData MSRP')[1].text.should == "390"
           body_doc.css('AmazonEnvelope Message Product DescriptionData MSRP').first.attributes["currency"].value.should == "USD"
-          body_doc.css('AmazonEnvelope Message Product DescriptionData SearchTerms').length.should == 10
-          body_doc.css('AmazonEnvelope Message Product DescriptionData SearchTerms').first.text.should == "hobbit"
-          body_doc.css('AmazonEnvelope Message Product DescriptionData SearchTerms').last.text.should == "sequel"
+          pp body_doc.css('AmazonEnvelope Message Product DescriptionData SearchTerms')
+          pp body_doc.css('AmazonEnvelope Message Product DescriptionData SearchTerms')[0]
+          pp body_doc.css('AmazonEnvelope Message Product DescriptionData SearchTerms')[1]
+          body_doc.css('AmazonEnvelope Message Product DescriptionData SearchTerms').length.should == 5
+          body_doc.css('AmazonEnvelope Message Product DescriptionData SearchTerms').first.text.should == "layne mcdonald"
+          body_doc.css('AmazonEnvelope Message Product DescriptionData SearchTerms').last.text.should == "friendship"
           body_doc.css('AmazonEnvelope Message Product DescriptionData PackageDimensions Length')[0].text.should == "14"
           body_doc.css('AmazonEnvelope Message Product DescriptionData PackageDimensions Width')[0].text.should == "12"
           body_doc.css('AmazonEnvelope Message Product DescriptionData PackageDimensions Height')[0].text.should == "1"
