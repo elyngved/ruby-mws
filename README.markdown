@@ -14,6 +14,10 @@ Quick Start
 
 To quickly test your connection to the service without credentials, you can ping the server, which returns server time in UTC:
 
+Start console(You have to be on the ruby-mws path)
+
+    rake console
+
     MWS::Base.server_time
 
 ### Initialization

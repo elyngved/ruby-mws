@@ -6,6 +6,7 @@ module MWS
     class Feed < Base
       ORDER_ACK = '_POST_ORDER_ACKNOWLEDGEMENT_DATA_'
       SHIP_ACK = '_POST_ORDER_FULFILLMENT_DATA_'
+      PRODUCT_LIST = '_POST_PRODUCT_DATA_'
 
       # POSTs a request to the submit feed action of the feeds api
       #
@@ -21,6 +22,8 @@ module MWS
                  content_for_ack_with(content_params)
                when SHIP_ACK
                  content_for_ship_with(content_params)
+               when PRODUCT_LIST
+                 content_for_product_list(content_params)
                end
         query_params = {:feed_type => type}
         options = {
@@ -49,6 +52,65 @@ module MWS
       # @option opts [String] :amazon_order_item_code ID of the specific item in the order
       # @option opts [String] :amazon_order_id ID of the order on amazon's side
       # @option opts [String] :merchant_order_id Internal order id
+      # @option opts [String] :merchant_order_item_id Internal order line item id
+      def content_for_product_list(opts={})
+        Nokogiri::XML::Builder.new do |xml|
+          xml.AmazonEnvelope("xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
+                             "xsi:noNamespaceSchemaLocation" => "amzn-envelope.xsd") { # add attrs here
+            xml.Header {
+              xml.DocumentVersion "1.01"
+              xml.MerchantIdentifier @connection.seller_id
+            }
+            xml.MessageType "Product"
+            xml.PurgeAndReplace opts[:purge_and_replace]
+            opts[:entries].each do |entry_hash|
+              xml.Message {
+                xml.MessageID entry_hash[:message_id]
+                xml.OperationType entry_hash[:operation_type]
+                xml.Product {
+                  xml.SKU entry_hash[:isbn]
+                  xml.StandardProductID {
+                    xml.Type  "ISBN"
+                    xml.Value entry_hash[:isbn]
+                  }
+                  xml.Condition {
+                    xml.ConditionType entry_hash[:item_condition_type]
+                  }
+                  xml.ItemPackageQuantity entry_hash[:item_package_quantity]
+                  xml.NumberOfItems entry_hash[:number_of_items]
+                  xml.DescriptionData {
+                    xml.Title entry_hash[:title]
+                    xml.Brand entry_hash[:brand]
+                    xml.Description entry_hash[:description]
+                    xml.PackageDimensions {
+                      xml.Length(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_length]) }
+                      xml.Width(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_width]) }
+                      xml.Height(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_height]) }
+                    }
+                    xml.MSRP(:currency => entry_hash[:currency]){ xml.text(entry_hash[:standard_price]) }
+                    xml.Manufacturer entry_hash[:manufacturer]
+                    entry_hash[:search_terms][:taggings].each do |search_term|
+                      xml.SearchTerms {xml.text(search_term[:tag_name])}
+                    end
+                  }
+                    xml.ProductData {
+                      xml.Books {
+                        xml.ProductType {
+                          xml.BooksMisc {
+                            xml.Author entry_hash[:authors]
+                            xml.Binding entry_hash[:binding]
+                            xml.PublicationDate entry_hash[:publication_date]
+                          }
+                        }
+                      }
+                  }
+                }
+              }
+            end
+          }
+        end.to_xml
+      end
+
       # @option opts [String] :status_code (optional) Ack status code. Defaults to 'Success'
       # @option opts [String] :merchant_order_item_id (optional) Internal order line item id
       # @option opts [Array<Hash{Symbol=>String}>] :items (optional) list of items in the order
@@ -79,6 +141,7 @@ module MWS
         end.to_xml
       end
 
+
       # Returns a string containing the shipping achnowledgement xml
       #
       # @param [Hash{Symbol => String,Array,DateTime}] opts contains:
@@ -97,7 +160,7 @@ module MWS
       #   @option opts [String] :tracking_number (optional) shipper tracking number
       #   @option opts [String] :fulfillment_date (optional) DateTime the order was fulfilled
       #     defaults to the current time
-      #   @option opts [String] :merchant_order_item_id Internal order line item id            
+      #   @option opts [String] :merchant_order_item_id Internal order line item id
       def content_for_ship_with(opts={})
         fulfillment_date = opts[:fulfillment_date] || DateTime.now
 
