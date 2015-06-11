@@ -49,24 +49,28 @@ module MWS
       end
 
       private
-
-      def content_for_product_list_price(opts={})
+      def amazon_envelope_with_header
         Nokogiri::XML::Builder.new do |xml|
-          xml.AmazonEnvelope("xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
-                             "xsi:noNamespaceSchemaLocation" => "amzn-envelope.xsd") { # add attrs here
+          xml.AmazonEnvelope("xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance", "xsi:noNamespaceSchemaLocation" => "amzn-envelope.xsd") { # add attrs here
             xml.Header {
               xml.DocumentVersion "1.01"
               xml.MerchantIdentifier @connection.seller_id
             }
-            xml.MessageType "Price"
-            xml.PurgeAndReplace opts[:purge_and_replace]
-            xml.Message {
-              xml.MessageID opts[:message_id]
-              xml.OperationType opts[:operation_type]
-              xml.Price {
-                xml.SKU opts[:isbn]
-                xml.StandardPrice(:currency => opts[:currency]){ xml.text(opts[:standard_price]) }
-              }
+            yield xml
+          }
+        end
+      end
+
+      def content_for_product_list_price(opts={})
+        amazon_envelope_with_header do |xml|
+          xml.MessageType "Price"
+          xml.PurgeAndReplace opts[:purge_and_replace]
+          xml.Message {
+            xml.MessageID opts[:message_id]
+            xml.OperationType opts[:operation_type]
+            xml.Price {
+              xml.SKU opts[:isbn]
+              xml.StandardPrice(:currency => opts[:currency]){ xml.text(opts[:standard_price]) }
             }
           }
         end.to_xml
@@ -79,60 +83,53 @@ module MWS
       # @option opts [String] :merchant_order_id Internal order id
       # @option opts [String] :merchant_order_item_id Internal order line item id
       def content_for_product_list(opts={})
-        Nokogiri::XML::Builder.new do |xml|
-          xml.AmazonEnvelope("xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
-                             "xsi:noNamespaceSchemaLocation" => "amzn-envelope.xsd") { # add attrs here
-            xml.Header {
-              xml.DocumentVersion "1.01"
-              xml.MerchantIdentifier @connection.seller_id
-            }
-            xml.MessageType "Product"
-            xml.PurgeAndReplace opts[:purge_and_replace]
-            opts[:entries].each do |entry_hash|
-              xml.Message {
-                xml.MessageID entry_hash[:message_id]
-                xml.OperationType entry_hash[:operation_type]
-                xml.Product {
-                  xml.SKU entry_hash[:isbn]
-                  xml.StandardProductID {
-                    xml.Type  "ISBN"
-                    xml.Value entry_hash[:isbn]
+        amazon_envelope_with_header do |xml|
+          xml.MessageType "Product"
+          xml.PurgeAndReplace opts[:purge_and_replace]
+          opts[:entries].each do |entry_hash|
+            xml.Message {
+              xml.MessageID entry_hash[:message_id]
+              xml.OperationType entry_hash[:operation_type]
+              xml.Product {
+                xml.SKU entry_hash[:isbn]
+                xml.StandardProductID {
+                  xml.Type  "ISBN"
+                  xml.Value entry_hash[:isbn]
+                }
+                xml.Condition {
+                  xml.ConditionType entry_hash[:item_condition_type]
+                }
+                xml.ItemPackageQuantity entry_hash[:item_package_quantity]
+                xml.NumberOfItems entry_hash[:number_of_items]
+                xml.DescriptionData {
+                  xml.Title entry_hash[:title]
+                  xml.Brand entry_hash[:brand]
+                  xml.Description entry_hash[:description]
+                  xml.PackageDimensions {
+                    xml.Length(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_length]) }
+                    xml.Width(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_width]) }
+                    xml.Height(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_height]) }
                   }
-                  xml.Condition {
-                    xml.ConditionType entry_hash[:item_condition_type]
-                  }
-                  xml.ItemPackageQuantity entry_hash[:item_package_quantity]
-                  xml.NumberOfItems entry_hash[:number_of_items]
-                  xml.DescriptionData {
-                    xml.Title entry_hash[:title]
-                    xml.Brand entry_hash[:brand]
-                    xml.Description entry_hash[:description]
-                    xml.PackageDimensions {
-                      xml.Length(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_length]) }
-                      xml.Width(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_width]) }
-                      xml.Height(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_height]) }
-                    }
-                    xml.MSRP(:currency => entry_hash[:currency]){ xml.text(entry_hash[:standard_price]) }
-                    xml.Manufacturer entry_hash[:manufacturer]
-                    entry_hash[:search_terms][:taggings].each do |search_term|
-                      xml.SearchTerms {xml.text(search_term[:tag_name])}
-                    end
-                  }
-                    xml.ProductData {
-                      xml.Books {
-                        xml.ProductType {
-                          xml.BooksMisc {
-                            xml.Author entry_hash[:authors]
-                            xml.Binding entry_hash[:binding]
-                            xml.PublicationDate entry_hash[:publication_date]
-                          }
+                  xml.MSRP(:currency => entry_hash[:currency]){ xml.text(entry_hash[:standard_price]) }
+                  xml.Manufacturer entry_hash[:manufacturer]
+                  entry_hash[:search_terms][:taggings].each do |search_term|
+                    xml.SearchTerms {xml.text(search_term[:tag_name])}
+                  end
+                }
+                  xml.ProductData {
+                    xml.Books {
+                      xml.ProductType {
+                        xml.BooksMisc {
+                          xml.Author entry_hash[:authors]
+                          xml.Binding entry_hash[:binding]
+                          xml.PublicationDate entry_hash[:publication_date]
                         }
                       }
-                  }
+                    }
                 }
               }
-            end
-          }
+            }
+          end
         end.to_xml
       end
 

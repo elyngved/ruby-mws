@@ -152,6 +152,7 @@ describe MWS::API::Feed do
           hash.should include(:body)
           body = hash[:body]
           body_doc = Nokogiri.parse(body)
+          body_doc.css('AmazonEnvelope Header MerchantIdentifier').text.should == "doma"
           body_doc.css('AmazonEnvelope MessageType').text.should == "OrderAcknowledgement"
           body_doc.css('AmazonEnvelope Message OrderAcknowledgement').should_not be_empty
           body_doc.css('AmazonEnvelope Message OrderAcknowledgement AmazonOrderID').text.should == order_ack_order_id
@@ -190,6 +191,7 @@ describe MWS::API::Feed do
           ids[0].text.should == first_order_id
           ids[1].text.should == second_order_id
 
+          body_doc.css('AmazonEnvelope Header MerchantIdentifier').text.should == "doma"
           body_doc.css('AmazonEnvelope MessageType').length.should == 1 # multiple types was causing problems
           body_doc.css('AmazonEnvelope Message OrderFulfillment').should_not be_empty
           body_doc.css('AmazonEnvelope Message OrderFulfillment AmazonOrderID').should_not be_empty
@@ -225,6 +227,7 @@ describe MWS::API::Feed do
             body = product_price_hash[:body]
             body_doc = Nokogiri.parse(body)
 
+            body_doc.css('AmazonEnvelope Header MerchantIdentifier').text.should == "doma"
             body_doc.css('AmazonEnvelope Message Price SKU').should_not be_empty
             body_doc.css('AmazonEnvelope Message Price SKU').text.should == "9781320717869"
             body_doc.css('AmazonEnvelope MessageType').length.should == 1 # multiple types was causing problems
@@ -256,6 +259,7 @@ describe MWS::API::Feed do
           ids[0].text.should == first_item_code
           ids[1].text.should == second_item_code
 
+          body_doc.css('AmazonEnvelope Header MerchantIdentifier').text.should == "doma"
           body_doc.css('AmazonEnvelope MessageType').length.should == 1 # multiple types was causing problems
           body_doc.css('AmazonEnvelope PurgeAndReplace').text.should == "false"
           body_doc.css('AmazonEnvelope Message Product').should_not be_empty
