@@ -66,14 +66,30 @@ describe MWS::API::Feed do
       :merchant_order_item_id => merchant_order_item_code
     }}
 
-    let(:product_image_hash) {
+    let(:product_image_hash_1) {
       {
-          :purge_and_replace => false,
           :message_id => 1,
           :operation_type => 'Update',
           :isbn => '9781320717869',
           :image_type => 'Main',
           :image_location => 'https://www-techinasiacom.netdna-ssl.com/wp-content/uploads/2012/05/funny-cat.jpg'
+      }
+    }
+
+    let(:product_image_hash_2) {
+      {
+          :message_id => 2,
+          :operation_type => 'Update',
+          :isbn => '9781320717870',
+          :image_type => 'Main',
+          :image_location => 'http://www.vetprofessionals.com/catprofessional/images/home-cat.jpg'
+      }
+    }
+
+    let(:product_price_hash_list) {
+      {
+          :purge_and_replace => false,
+          :entries => [ product_image_hash_1, product_image_hash_2 ]
       }
     }
 
@@ -87,7 +103,7 @@ describe MWS::API::Feed do
         info.feed_type.should == MWS::API::Feed::ORDER_ACK
       end
 
-      it "should create the correctx body for an order" do
+      it "should create the correct body for an order" do
         MWS::API::Feed.should_receive(:post) do |uri, hash|
           hash.should include(:body)
           body = hash[:body]
@@ -153,7 +169,7 @@ describe MWS::API::Feed do
 
       context "#product_image_data" do
         it 'should be able to set the image for a product'  do
-          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST_IMAGE, product_image_hash)
+          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST_IMAGE, product_price_hash_list)
           response.feed_submission_info.should_not be_nil
 
           info = response.feed_submission_info
@@ -161,21 +177,25 @@ describe MWS::API::Feed do
           info.feed_type.should == MWS::API::Feed::PRODUCT_LIST_IMAGE
         end
 
-        it "should create the correct body for product" do
+        it "should create the correct body for product images" do
           MWS::API::Feed.should_receive(:post) do |uri, product_image_hash|
             product_image_hash.should include(:body)
             body = product_image_hash[:body]
             body_doc = Nokogiri.parse(body)
 
-            body_doc.css('AmazonEnvelope Message ProductImage SKU').should_not be_empty
-            body_doc.css('AmazonEnvelope Message ProductImage SKU').text.should == "9781320717869"
-            body_doc.css('AmazonEnvelope MessageType').length.should == 1 # multiple types was causing problems
+            body_doc.css('AmazonEnvelope Header MerchantIdentifier').text.should == "doma"
+            body_doc.css('AmazonEnvelope MessageType').text.should == "ProductImage"
             body_doc.css('AmazonEnvelope PurgeAndReplace').text.should == "false"
+            body_doc.css('AmazonEnvelope Message MessageID')[0].text.should == "1"
+            body_doc.css('AmazonEnvelope Message MessageID')[1].text.should == "2"
+            body_doc.css('AmazonEnvelope Message ProductImage SKU')[0].text.should == "9781320717869"
+            body_doc.css('AmazonEnvelope Message ProductImage SKU')[1].text.should == "9781320717870"
             body_doc.css('AmazonEnvelope Message ProductImage').should_not be_empty
-            body_doc.css('AmazonEnvelope Message ProductImage ImageType').text.should == "Main"
-            body_doc.css('AmazonEnvelope Message ProductImage ImageLocation').text.should == "https://www-techinasiacom.netdna-ssl.com/wp-content/uploads/2012/05/funny-cat.jpg"
+            body_doc.css('AmazonEnvelope Message ProductImage ImageType')[0].text.should == "Main"
+            body_doc.css('AmazonEnvelope Message ProductImage ImageLocation')[0].text.should == "https://www-techinasiacom.netdna-ssl.com/wp-content/uploads/2012/05/funny-cat.jpg"
+            body_doc.css('AmazonEnvelope Message ProductImage ImageLocation')[1].text.should == "http://www.vetprofessionals.com/catprofessional/images/home-cat.jpg"
           end
-          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST_IMAGE, product_image_hash)
+          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST_IMAGE, product_price_hash_list)
         end
       end
     end
