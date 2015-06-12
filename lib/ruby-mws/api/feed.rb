@@ -139,27 +139,20 @@ module MWS
       # @option opts [String] :merchant_order_item_id (optional) Internal order line item id
       # @option opts [Array<Hash{Symbol=>String}>] :items (optional) list of items in the order
       def content_for_ack_with(opts={})
-        Nokogiri::XML::Builder.new do |xml|
-          xml.AmazonEnvelope("xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
-                             "xsi:noNamespaceSchemaLocation" => "amzn-envelope.xsd") { # add attrs here
-            xml.Header {
-              xml.DocumentVersion "1.01"
-              xml.MerchantIdentifier @connection.seller_id
-            }
-            xml.MessageType "OrderAcknowledgement"
-            xml.Message {
-              xml.MessageID "1"
-              xml.OrderAcknowledgement {
-                xml.AmazonOrderID opts[:amazon_order_id]
-                xml.MerchantOrderID opts[:merchant_order_id]                  
-                xml.StatusCode opts[:status_code] || "Success"
-                (opts[:items] || [opts]).each do |item_hash|
-                  xml.Item {
-                    xml.AmazonOrderItemCode item_hash[:amazon_order_item_code]
-                    xml.MerchantOrderItemID item_hash[:merchant_order_item_id]
-                  }
-                end
-              }
+        amazon_envelope_with_header do |xml|
+          xml.MessageType "OrderAcknowledgement"
+          xml.Message {
+            xml.MessageID "1"
+            xml.OrderAcknowledgement {
+              xml.AmazonOrderID opts[:amazon_order_id]
+              xml.MerchantOrderID opts[:merchant_order_id]
+              xml.StatusCode opts[:status_code] || "Success"
+              (opts[:items] || [opts]).each do |item_hash|
+                xml.Item {
+                  xml.AmazonOrderItemCode item_hash[:amazon_order_item_code]
+                  xml.MerchantOrderItemID item_hash[:merchant_order_item_id]
+                }
+              end
             }
           }
         end.to_xml
@@ -188,35 +181,28 @@ module MWS
       def content_for_ship_with(opts={})
         fulfillment_date = opts[:fulfillment_date] || DateTime.now
 
-        Nokogiri::XML::Builder.new do |xml|
-          xml.AmazonEnvelope('xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-                             'xsi:noNamespaceSchemaLocation' => 'amzn-envelope.xsd') {
-            xml.Header {
-              xml.DocumentVersion "1.01"
-              xml.MerchantIdentifier @connection.seller_id
-            }
-            xml.MessageType "OrderFulfillment"
-            opts[:orders].each do |order_hash|
-              xml.Message {
-                xml.MessageID order_hash[:message_id]
-                xml.OrderFulfillment {
-                  xml.AmazonOrderID order_hash[:amazon_order_id]
-                  xml.FulfillmentDate fulfillment_date
-                  xml.FulfillmentData {
-                    xml.CarrierCode order_hash[:carrier_code]
-                    xml.ShippingMethod order_hash[:shipping_method]
-                    xml.ShipperTrackingNumber order_hash[:tracking_number] if order_hash[:tracking_number]
-                  }
-                  order_hash[:items].each do |item_hash|
-                    xml.Item {
-                      xml.AmazonOrderItemCode item_hash[:amazon_order_item_code]
-                      xml.Quantity item_hash[:quantity]
-                    }
-                  end
+        amazon_envelope_with_header do |xml|
+          xml.MessageType "OrderFulfillment"
+          opts[:orders].each do |order_hash|
+            xml.Message {
+              xml.MessageID order_hash[:message_id]
+              xml.OrderFulfillment {
+                xml.AmazonOrderID order_hash[:amazon_order_id]
+                xml.FulfillmentDate fulfillment_date
+                xml.FulfillmentData {
+                  xml.CarrierCode order_hash[:carrier_code]
+                  xml.ShippingMethod order_hash[:shipping_method]
+                  xml.ShipperTrackingNumber order_hash[:tracking_number] if order_hash[:tracking_number]
                 }
+                order_hash[:items].each do |item_hash|
+                  xml.Item {
+                    xml.AmazonOrderItemCode item_hash[:amazon_order_item_code]
+                    xml.Quantity item_hash[:quantity]
+                  }
+                end
               }
-            end
-          }
+            }
+          end
         end.to_xml
       end
     end
