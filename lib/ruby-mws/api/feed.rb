@@ -65,14 +65,16 @@ module MWS
         amazon_envelope_with_header do |xml|
           xml.MessageType "Price"
           xml.PurgeAndReplace opts[:purge_and_replace]
-          xml.Message {
-            xml.MessageID opts[:message_id]
-            xml.OperationType opts[:operation_type]
-            xml.Price {
-              xml.SKU opts[:isbn]
-              xml.StandardPrice(:currency => opts[:currency]){ xml.text(opts[:standard_price]) }
+          opts[:entries].each do |entry|
+            xml.Message {
+              xml.MessageID entry[:message_id]
+              xml.OperationType entry[:operation_type]
+              xml.Price {
+                xml.SKU entry[:isbn]
+                xml.StandardPrice(:currency => entry[:currency]){ xml.text(entry[:standard_price]) }
+              }
             }
-          }
+          end
         end.to_xml
       end
       # Returns a string containing the order acknowledgement xml
