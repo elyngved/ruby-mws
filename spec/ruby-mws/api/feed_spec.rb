@@ -230,9 +230,6 @@ describe MWS::API::Feed do
           body_doc.css('AmazonEnvelope Message Product DescriptionData MSRP')[0].text.should == "290"
           body_doc.css('AmazonEnvelope Message Product DescriptionData MSRP')[1].text.should == "390"
           body_doc.css('AmazonEnvelope Message Product DescriptionData MSRP').first.attributes["currency"].value.should == "USD"
-          pp body_doc.css('AmazonEnvelope Message Product DescriptionData SearchTerms')
-          pp body_doc.css('AmazonEnvelope Message Product DescriptionData SearchTerms')[0]
-          pp body_doc.css('AmazonEnvelope Message Product DescriptionData SearchTerms')[1]
           body_doc.css('AmazonEnvelope Message Product DescriptionData SearchTerms').length.should == 5
           body_doc.css('AmazonEnvelope Message Product DescriptionData SearchTerms').first.text.should == "layne mcdonald"
           body_doc.css('AmazonEnvelope Message Product DescriptionData SearchTerms').last.text.should == "friendship"
