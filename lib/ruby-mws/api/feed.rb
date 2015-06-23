@@ -7,6 +7,7 @@ module MWS
       ORDER_ACK = '_POST_ORDER_ACKNOWLEDGEMENT_DATA_'
       SHIP_ACK = '_POST_ORDER_FULFILLMENT_DATA_'
       PRODUCT_LIST = '_POST_PRODUCT_DATA_'
+      PRODUCT_LIST_IMAGE = '_POST_PRODUCT_IMAGE_DATA_'
       PRODUCT_LIST_PRICE = '_POST_PRODUCT_PRICING_DATA_'
 
       # POSTs a request to the submit feed action of the feeds api
@@ -25,6 +26,8 @@ module MWS
                  content_for_ship_with(content_params)
                when PRODUCT_LIST
                  content_for_product_list(content_params)
+               when PRODUCT_LIST_IMAGE
+                 content_for_product_list_image(content_params)
                when PRODUCT_LIST_PRICE
                  content_for_product_list_price(content_params)
                end
@@ -49,6 +52,7 @@ module MWS
       end
 
       private
+
       def amazon_envelope_with_header
         Nokogiri::XML::Builder.new do |xml|
           xml.AmazonEnvelope("xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance", "xsi:noNamespaceSchemaLocation" => "amzn-envelope.xsd") { # add attrs here
@@ -77,6 +81,25 @@ module MWS
           end
         end.to_xml
       end
+
+      def content_for_product_list_image(opts={})
+        amazon_envelope_with_header do |xml|
+          xml.MessageType "ProductImage"
+          xml.PurgeAndReplace opts[:purge_and_replace]
+          opts[:entries].each do |entry|
+            xml.Message {
+              xml.MessageID entry[:message_id]
+              xml.OperationType entry[:operation_type]
+              xml.ProductImage {
+                xml.SKU entry[:isbn]
+                xml.ImageType entry[:image_type]
+                xml.ImageLocation entry[:image_location]
+              }
+            }
+          end
+        end.to_xml
+      end
+
       # Returns a string containing the order acknowledgement xml
       #
       # @param opts [Hash{Symbol => String}] contains
