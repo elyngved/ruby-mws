@@ -126,6 +126,32 @@ describe MWS::API::Feed do
       }
     }
 
+    let(:product_price_hash_first) {
+      {
+          :message_id => 1,
+          :operation_type => 'Update',
+          :isbn => '9781320717869',
+          :currency => 'USD',
+          :standard_price => '290'
+      }
+    }
+
+    let(:product_price_hash_second) {
+      {
+          :message_id => 2,
+          :operation_type => 'Update',
+          :isbn => '9781320717870',
+          :currency => 'USD',
+          :standard_price => '400'
+      }
+    }
+    let(:product_price_hash_list) {
+      {
+          :purge_and_replace => false,
+          :entries => [ product_price_hash_first, product_price_hash_second ]
+      }
+    }
+
     describe "submit_feed" do
       it "should be able to ack an order" do
         response = mws.feeds.submit_feed(MWS::API::Feed::ORDER_ACK, order_hash)
@@ -136,11 +162,12 @@ describe MWS::API::Feed do
         info.feed_type.should == MWS::API::Feed::ORDER_ACK
       end
 
-      it "should create the correctx body for an order" do
+      it "should create the correct body for an order" do
         MWS::API::Feed.should_receive(:post) do |uri, hash|
           hash.should include(:body)
           body = hash[:body]
           body_doc = Nokogiri.parse(body)
+          body_doc.css('AmazonEnvelope Header MerchantIdentifier').text.should == "doma"
           body_doc.css('AmazonEnvelope MessageType').text.should == "OrderAcknowledgement"
           body_doc.css('AmazonEnvelope Message OrderAcknowledgement').should_not be_empty
           body_doc.css('AmazonEnvelope Message OrderAcknowledgement AmazonOrderID').text.should == order_ack_order_id
@@ -179,7 +206,7 @@ describe MWS::API::Feed do
           ids[0].text.should == first_order_id
           ids[1].text.should == second_order_id
 
-
+          body_doc.css('AmazonEnvelope Header MerchantIdentifier').text.should == "doma"
           body_doc.css('AmazonEnvelope MessageType').length.should == 1 # multiple types was causing problems
           body_doc.css('AmazonEnvelope Message OrderFulfillment').should_not be_empty
           body_doc.css('AmazonEnvelope Message OrderFulfillment AmazonOrderID').should_not be_empty
@@ -197,6 +224,39 @@ describe MWS::API::Feed do
           body_doc.css('AmazonEnvelope Message Item AmazonOrderItemCode')[3].text.should == fourth_item_code
         end
         response = mws.feeds.submit_feed(MWS::API::Feed::SHIP_ACK, shipment_hash)
+      end
+
+      context "#product_price_data" do
+        it 'should be able to set the price'  do
+          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST_PRICE, product_price_hash_list)
+          response.feed_submission_info.should_not be_nil
+
+          info = response.feed_submission_info
+          info.feed_processing_status.should == "_SUBMITTED_"
+          info.feed_type.should == MWS::API::Feed::PRODUCT_LIST_PRICE
+        end
+
+        it "should create the correct body for price" do
+          MWS::API::Feed.should_receive(:post) do |uri, hash_list|
+            hash_list.should include(:body)
+            body = hash_list[:body]
+            body_doc = Nokogiri.parse(body)
+
+            body_doc.css('AmazonEnvelope Header MerchantIdentifier').text.should == "doma"
+            body_doc.css('AmazonEnvelope Message Price SKU').should_not be_empty
+            body_doc.css('AmazonEnvelope Message MessageID')[0].text.should == "1"
+            body_doc.css('AmazonEnvelope Message MessageID')[1].text.should == "2"
+            body_doc.css('AmazonEnvelope Message Price SKU')[0].text.should == "9781320717869"
+            body_doc.css('AmazonEnvelope Message Price SKU')[1].text.should == "9781320717870"
+            body_doc.css('AmazonEnvelope MessageType').length.should == 1
+            body_doc.css('AmazonEnvelope PurgeAndReplace').text.should == "false"
+            body_doc.css('AmazonEnvelope Message Price').should_not be_empty
+            body_doc.css('AmazonEnvelope Message Price StandardPrice')[0].text.should == "290"
+            body_doc.css('AmazonEnvelope Message Price StandardPrice')[1].text.should == "400"
+            body_doc.css('AmazonEnvelope Message Price StandardPrice').first.attributes["currency"].value.should == "USD"
+          end
+          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST_PRICE, product_price_hash_list)
+        end
       end
 
       it 'should be able to ack the product' do
@@ -218,6 +278,7 @@ describe MWS::API::Feed do
           ids[0].text.should == first_item_code
           ids[1].text.should == second_item_code
 
+          body_doc.css('AmazonEnvelope Header MerchantIdentifier').text.should == "doma"
           body_doc.css('AmazonEnvelope MessageType').length.should == 1 # multiple types was causing problems
           body_doc.css('AmazonEnvelope PurgeAndReplace').text.should == "false"
           body_doc.css('AmazonEnvelope Message Product').should_not be_empty
@@ -245,7 +306,6 @@ describe MWS::API::Feed do
         end
         response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST, product_hash_list)
       end
-
     end
     
     describe "callback block" do
