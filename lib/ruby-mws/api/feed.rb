@@ -7,6 +7,7 @@ module MWS
       ORDER_ACK = '_POST_ORDER_ACKNOWLEDGEMENT_DATA_'
       SHIP_ACK = '_POST_ORDER_FULFILLMENT_DATA_'
       PRODUCT_LIST = '_POST_PRODUCT_DATA_'
+      PRODUCT_LIST_PRICE = '_POST_PRODUCT_PRICING_DATA_'
 
       # POSTs a request to the submit feed action of the feeds api
       #
@@ -24,6 +25,8 @@ module MWS
                  content_for_ship_with(content_params)
                when PRODUCT_LIST
                  content_for_product_list(content_params)
+               when PRODUCT_LIST_PRICE
+                 content_for_product_list_price(content_params)
                end
         query_params = {:feed_type => type}
         options = {
@@ -46,6 +49,34 @@ module MWS
       end
 
       private
+      def amazon_envelope_with_header
+        Nokogiri::XML::Builder.new do |xml|
+          xml.AmazonEnvelope("xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance", "xsi:noNamespaceSchemaLocation" => "amzn-envelope.xsd") { # add attrs here
+            xml.Header {
+              xml.DocumentVersion "1.01"
+              xml.MerchantIdentifier @connection.seller_id
+            }
+            yield xml
+          }
+        end
+      end
+
+      def content_for_product_list_price(opts={})
+        amazon_envelope_with_header do |xml|
+          xml.MessageType "Price"
+          xml.PurgeAndReplace opts[:purge_and_replace]
+          opts[:entries].each do |entry|
+            xml.Message {
+              xml.MessageID entry[:message_id]
+              xml.OperationType entry[:operation_type]
+              xml.Price {
+                xml.SKU entry[:isbn]
+                xml.StandardPrice(:currency => entry[:currency]){ xml.text(entry[:standard_price]) }
+              }
+            }
+          end
+        end.to_xml
+      end
       # Returns a string containing the order acknowledgement xml
       #
       # @param opts [Hash{Symbol => String}] contains
@@ -54,60 +85,53 @@ module MWS
       # @option opts [String] :merchant_order_id Internal order id
       # @option opts [String] :merchant_order_item_id Internal order line item id
       def content_for_product_list(opts={})
-        Nokogiri::XML::Builder.new do |xml|
-          xml.AmazonEnvelope("xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
-                             "xsi:noNamespaceSchemaLocation" => "amzn-envelope.xsd") { # add attrs here
-            xml.Header {
-              xml.DocumentVersion "1.01"
-              xml.MerchantIdentifier @connection.seller_id
-            }
-            xml.MessageType "Product"
-            xml.PurgeAndReplace opts[:purge_and_replace]
-            opts[:entries].each do |entry_hash|
-              xml.Message {
-                xml.MessageID entry_hash[:message_id]
-                xml.OperationType entry_hash[:operation_type]
-                xml.Product {
-                  xml.SKU entry_hash[:isbn]
-                  xml.StandardProductID {
-                    xml.Type  "ISBN"
-                    xml.Value entry_hash[:isbn]
+        amazon_envelope_with_header do |xml|
+          xml.MessageType "Product"
+          xml.PurgeAndReplace opts[:purge_and_replace]
+          opts[:entries].each do |entry_hash|
+            xml.Message {
+              xml.MessageID entry_hash[:message_id]
+              xml.OperationType entry_hash[:operation_type]
+              xml.Product {
+                xml.SKU entry_hash[:isbn]
+                xml.StandardProductID {
+                  xml.Type  "ISBN"
+                  xml.Value entry_hash[:isbn]
+                }
+                xml.Condition {
+                  xml.ConditionType entry_hash[:item_condition_type]
+                }
+                xml.ItemPackageQuantity entry_hash[:item_package_quantity]
+                xml.NumberOfItems entry_hash[:number_of_items]
+                xml.DescriptionData {
+                  xml.Title entry_hash[:title]
+                  xml.Brand entry_hash[:brand]
+                  xml.Description entry_hash[:description]
+                  xml.PackageDimensions {
+                    xml.Length(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_length]) }
+                    xml.Width(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_width]) }
+                    xml.Height(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_height]) }
                   }
-                  xml.Condition {
-                    xml.ConditionType entry_hash[:item_condition_type]
-                  }
-                  xml.ItemPackageQuantity entry_hash[:item_package_quantity]
-                  xml.NumberOfItems entry_hash[:number_of_items]
-                  xml.DescriptionData {
-                    xml.Title entry_hash[:title]
-                    xml.Brand entry_hash[:brand]
-                    xml.Description entry_hash[:description]
-                    xml.PackageDimensions {
-                      xml.Length(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_length]) }
-                      xml.Width(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_width]) }
-                      xml.Height(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_height]) }
-                    }
-                    xml.MSRP(:currency => entry_hash[:currency]){ xml.text(entry_hash[:standard_price]) }
-                    xml.Manufacturer entry_hash[:manufacturer]
-                    entry_hash[:search_terms][:taggings].each do |search_term|
-                      xml.SearchTerms {xml.text(search_term[:tag_name])}
-                    end
-                  }
-                    xml.ProductData {
-                      xml.Books {
-                        xml.ProductType {
-                          xml.BooksMisc {
-                            xml.Author entry_hash[:authors]
-                            xml.Binding entry_hash[:binding]
-                            xml.PublicationDate entry_hash[:publication_date]
-                          }
+                  xml.MSRP(:currency => entry_hash[:currency]){ xml.text(entry_hash[:standard_price]) }
+                  xml.Manufacturer entry_hash[:manufacturer]
+                  entry_hash[:search_terms][:taggings].each do |search_term|
+                    xml.SearchTerms {xml.text(search_term[:tag_name])}
+                  end
+                }
+                  xml.ProductData {
+                    xml.Books {
+                      xml.ProductType {
+                        xml.BooksMisc {
+                          xml.Author entry_hash[:authors]
+                          xml.Binding entry_hash[:binding]
+                          xml.PublicationDate entry_hash[:publication_date]
                         }
                       }
-                  }
+                    }
                 }
               }
-            end
-          }
+            }
+          end
         end.to_xml
       end
 
@@ -115,27 +139,20 @@ module MWS
       # @option opts [String] :merchant_order_item_id (optional) Internal order line item id
       # @option opts [Array<Hash{Symbol=>String}>] :items (optional) list of items in the order
       def content_for_ack_with(opts={})
-        Nokogiri::XML::Builder.new do |xml|
-          xml.AmazonEnvelope("xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
-                             "xsi:noNamespaceSchemaLocation" => "amzn-envelope.xsd") { # add attrs here
-            xml.Header {
-              xml.DocumentVersion "1.01"
-              xml.MerchantIdentifier @connection.seller_id
-            }
-            xml.MessageType "OrderAcknowledgement"
-            xml.Message {
-              xml.MessageID "1"
-              xml.OrderAcknowledgement {
-                xml.AmazonOrderID opts[:amazon_order_id]
-                xml.MerchantOrderID opts[:merchant_order_id]                  
-                xml.StatusCode opts[:status_code] || "Success"
-                (opts[:items] || [opts]).each do |item_hash|
-                  xml.Item {
-                    xml.AmazonOrderItemCode item_hash[:amazon_order_item_code]
-                    xml.MerchantOrderItemID item_hash[:merchant_order_item_id]
-                  }
-                end
-              }
+        amazon_envelope_with_header do |xml|
+          xml.MessageType "OrderAcknowledgement"
+          xml.Message {
+            xml.MessageID "1"
+            xml.OrderAcknowledgement {
+              xml.AmazonOrderID opts[:amazon_order_id]
+              xml.MerchantOrderID opts[:merchant_order_id]
+              xml.StatusCode opts[:status_code] || "Success"
+              (opts[:items] || [opts]).each do |item_hash|
+                xml.Item {
+                  xml.AmazonOrderItemCode item_hash[:amazon_order_item_code]
+                  xml.MerchantOrderItemID item_hash[:merchant_order_item_id]
+                }
+              end
             }
           }
         end.to_xml
@@ -164,35 +181,28 @@ module MWS
       def content_for_ship_with(opts={})
         fulfillment_date = opts[:fulfillment_date] || DateTime.now
 
-        Nokogiri::XML::Builder.new do |xml|
-          xml.AmazonEnvelope('xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-                             'xsi:noNamespaceSchemaLocation' => 'amzn-envelope.xsd') {
-            xml.Header {
-              xml.DocumentVersion "1.01"
-              xml.MerchantIdentifier @connection.seller_id
-            }
-            xml.MessageType "OrderFulfillment"
-            opts[:orders].each do |order_hash|
-              xml.Message {
-                xml.MessageID order_hash[:message_id]
-                xml.OrderFulfillment {
-                  xml.AmazonOrderID order_hash[:amazon_order_id]
-                  xml.FulfillmentDate fulfillment_date
-                  xml.FulfillmentData {
-                    xml.CarrierCode order_hash[:carrier_code]
-                    xml.ShippingMethod order_hash[:shipping_method]
-                    xml.ShipperTrackingNumber order_hash[:tracking_number] if order_hash[:tracking_number]
-                  }
-                  order_hash[:items].each do |item_hash|
-                    xml.Item {
-                      xml.AmazonOrderItemCode item_hash[:amazon_order_item_code]
-                      xml.Quantity item_hash[:quantity]
-                    }
-                  end
+        amazon_envelope_with_header do |xml|
+          xml.MessageType "OrderFulfillment"
+          opts[:orders].each do |order_hash|
+            xml.Message {
+              xml.MessageID order_hash[:message_id]
+              xml.OrderFulfillment {
+                xml.AmazonOrderID order_hash[:amazon_order_id]
+                xml.FulfillmentDate fulfillment_date
+                xml.FulfillmentData {
+                  xml.CarrierCode order_hash[:carrier_code]
+                  xml.ShippingMethod order_hash[:shipping_method]
+                  xml.ShipperTrackingNumber order_hash[:tracking_number] if order_hash[:tracking_number]
                 }
+                order_hash[:items].each do |item_hash|
+                  xml.Item {
+                    xml.AmazonOrderItemCode item_hash[:amazon_order_item_code]
+                    xml.Quantity item_hash[:quantity]
+                  }
+                end
               }
-            end
-          }
+            }
+          end
         end.to_xml
       end
     end
