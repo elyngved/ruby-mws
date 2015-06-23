@@ -8,7 +8,7 @@ module MWS
       SHIP_ACK = '_POST_ORDER_FULFILLMENT_DATA_'
       PRODUCT_LIST = '_POST_PRODUCT_DATA_'
       PRODUCT_LIST_IMAGE = '_POST_PRODUCT_IMAGE_DATA_'
-
+      PRODUCT_LIST_PRICE = '_POST_PRODUCT_PRICING_DATA_'
 
       # POSTs a request to the submit feed action of the feeds api
       #
@@ -28,6 +28,8 @@ module MWS
                  content_for_product_list(content_params)
                when PRODUCT_LIST_IMAGE
                  content_for_product_list_image(content_params)
+               when PRODUCT_LIST_PRICE
+                 content_for_product_list_price(content_params)
                end
         query_params = {:feed_type => type}
         options = {
@@ -63,6 +65,23 @@ module MWS
         end
       end
 
+      def content_for_product_list_price(opts={})
+        amazon_envelope_with_header do |xml|
+          xml.MessageType "Price"
+          xml.PurgeAndReplace opts[:purge_and_replace]
+          opts[:entries].each do |entry|
+            xml.Message {
+              xml.MessageID entry[:message_id]
+              xml.OperationType entry[:operation_type]
+              xml.Price {
+                xml.SKU entry[:isbn]
+                xml.StandardPrice(:currency => entry[:currency]){ xml.text(entry[:standard_price]) }
+              }
+            }
+          end
+        end.to_xml
+      end
+
       def content_for_product_list_image(opts={})
         amazon_envelope_with_header do |xml|
           xml.MessageType "ProductImage"
@@ -80,6 +99,7 @@ module MWS
           end
         end.to_xml
       end
+
       # Returns a string containing the order acknowledgement xml
       #
       # @param opts [Hash{Symbol => String}] contains
@@ -149,18 +169,13 @@ module MWS
             xml.OrderAcknowledgement {
               xml.AmazonOrderID opts[:amazon_order_id]
               xml.MerchantOrderID opts[:merchant_order_id]
-              xml.StatusCode "Success"
-              xml.Item {
-                xml.AmazonOrderItemCode opts[:amazon_order_item_code]
-                xml.MerchantOrderItemID opts[:merchant_order_item_id]
-                xml.StatusCode opts[:status_code] || "Success"
-                (opts[:items] || [opts]).each do |item_hash|
-                  xml.Item {
-                    xml.AmazonOrderItemCode item_hash[:amazon_order_item_code]
-                    xml.MerchantOrderItemID item_hash[:merchant_order_item_id]
-                  }
-                end
-              }
+              xml.StatusCode opts[:status_code] || "Success"
+              (opts[:items] || [opts]).each do |item_hash|
+                xml.Item {
+                  xml.AmazonOrderItemCode item_hash[:amazon_order_item_code]
+                  xml.MerchantOrderItemID item_hash[:merchant_order_item_id]
+                }
+              end
             }
           }
         end.to_xml
