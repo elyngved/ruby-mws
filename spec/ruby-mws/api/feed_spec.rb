@@ -181,6 +181,54 @@ describe MWS::API::Feed do
       }
     }
 
+    describe "#feed_submission_result" do
+
+      it "should have feed_submission_id in params" do
+        feed_submission_id = "50130016609"
+        MWS::API::Feed.should_receive(:post) do |uri, hash|
+          uri.should include("FeedSubmissionId")
+        end
+        response = mws.feeds.feed_submission_result(feed_submission_id)
+      end
+
+      it "should have response" do
+        feed_submission_id = "50130016609"
+        MWS::API::Feed.should_receive(:post) do |uri, hash|
+          uri.should include("FeedSubmissionId")
+        end
+        response = mws.feeds.feed_submission_result(feed_submission_id)
+        response.should_not be_nil
+      end
+
+      it "should have error response if feed_submission_id is nil" do
+        feed_submission_id = nil
+        response = mws.feeds.feed_submission_result(feed_submission_id)
+        body_doc = Nokogiri.parse(response)
+        body_doc.css('ErrorResponse').should_not be_nil
+        body_doc.css('Error').should_not be_nil
+        body_doc.css('Error Type').text.should == 'Sender'
+        body_doc.css('Error Code').text.should == 'InvalidRequest'
+        body_doc.css('Error Message').text.should == 'parameter FeedSubmissionId failed a validation check: value cannot be empty.'
+        body_doc.css('Error Detail').should_not be_nil
+      end
+
+      it "should be able to post and get feed submission response" do
+        feed_submission_id = "50130016609"
+        response = mws.feeds.feed_submission_result(feed_submission_id)
+        response[:AmazonEnvelope].should_not be_nil
+        response[:AmazonEnvelope][:Message][:MessageID].should == "1"
+        response[:AmazonEnvelope][:Message][:ProcessingReport][:DocumentTransactionID].should == feed_submission_id
+        response[:AmazonEnvelope][:Message][:ProcessingReport][:StatusCode].should == "Complete"
+        response[:AmazonEnvelope][:Message][:ProcessingReport][:ProcessingSummary].should_not be_nil
+        response[:AmazonEnvelope][:Message][:ProcessingReport][:ProcessingSummary].should_not be_nil
+        response[:AmazonEnvelope][:Message][:ProcessingReport][:ProcessingSummary][:MessagesWithError].should == "1"
+        response[:AmazonEnvelope][:Message][:ProcessingReport][:Result].first[:ResultCode].should == "Error"
+        response[:AmazonEnvelope][:Message][:ProcessingReport][:Result].first[:ResultMessageCode].should_not be_nil
+        response[:AmazonEnvelope][:Message][:ProcessingReport][:Result].first[:ResultDescription].should_not be_nil
+      end
+
+    end
+
 
 
     describe "submit_feed" do

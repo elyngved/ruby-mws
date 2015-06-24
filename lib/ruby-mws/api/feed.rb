@@ -32,6 +32,38 @@ module MWS
                  content_for_product_list_price(content_params)
                end
         query_params = {:feed_type => type}
+        submit_to_mws(name, body, query_params)
+
+        # options = {
+        #   :verb => :post,
+        #   :uri => '/',
+        #   :version => '2009-01-01'
+        # }
+        # params = [default_params(name.to_s), query_params, options, @connection.to_hash].inject :merge
+        # query = Query.new params
+        # resp = self.class.post(query.request_uri,
+        #                        :body => body,
+        #                        :headers => {
+        #                                    'Content-MD5' => Base64.encode64(Digest::MD5.digest(body)),
+        #                                    'Content-Type' => 'text/xml; charset=iso-8859-1'
+        #                                    })
+        # @connection.call_communication_callbacks(:params => query.safe_params,
+        #                                          :body => body,
+        #                                          :response => resp)
+        # Response.parse resp, name, params
+      end
+
+      def feed_submission_result(feed_submission_id)
+        name = :get_feed_submission_result
+        body = ""
+        query_params = {:feed_submission_id => feed_submission_id}
+        submit_to_mws(name, body, query_params)
+      end
+
+
+      private
+
+      def submit_to_mws(name, body, query_params)
         options = {
           :verb => :post,
           :uri => '/',
@@ -50,8 +82,6 @@ module MWS
                                                  :response => resp)
         Response.parse resp, name, params
       end
-
-      private
 
       def amazon_envelope_with_header
         Nokogiri::XML::Builder.new do |xml|
@@ -180,7 +210,6 @@ module MWS
           }
         end.to_xml
       end
-
 
       # Returns a string containing the shipping achnowledgement xml
       #
