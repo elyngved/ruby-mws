@@ -13,3 +13,9 @@ gem 'rspec'
 gem 'ephemeral_response'
 gem 'awesome_print'
 gem 'pry'
+
+group :development, :test do
+  gem 'pry-remote'
+  gem 'pry-stack_explorer'
+  gem 'pry-byebug'
+end
