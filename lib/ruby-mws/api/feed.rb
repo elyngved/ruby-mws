@@ -32,6 +32,20 @@ module MWS
                  content_for_product_list_price(content_params)
                end
         query_params = {:feed_type => type}
+        submit_to_mws(name, body, query_params)
+      end
+
+      def feed_submission_result(feed_submission_id)
+        name = :get_feed_submission_result
+        body = ""
+        query_params = {:feed_submission_id => feed_submission_id}
+        submit_to_mws(name, body, query_params)
+      end
+
+
+      private
+
+      def submit_to_mws(name, body, query_params)
         options = {
           :verb => :post,
           :uri => '/',
@@ -50,8 +64,6 @@ module MWS
                                                  :response => resp)
         Response.parse resp, name, params
       end
-
-      private
 
       def amazon_envelope_with_header
         Nokogiri::XML::Builder.new do |xml|
@@ -180,7 +192,6 @@ module MWS
           }
         end.to_xml
       end
-
 
       # Returns a string containing the shipping achnowledgement xml
       #
