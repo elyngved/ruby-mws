@@ -9,6 +9,7 @@ module MWS
       PRODUCT_LIST = '_POST_PRODUCT_DATA_'
       PRODUCT_LIST_IMAGE = '_POST_PRODUCT_IMAGE_DATA_'
       PRODUCT_LIST_PRICE = '_POST_PRODUCT_PRICING_DATA_'
+      PRODUCT_LIST_INVENTORY = '_POST_INVENTORY_AVAILABILITY_DATA_'
 
       # POSTs a request to the submit feed action of the feeds api
       #
@@ -30,6 +31,8 @@ module MWS
                  content_for_product_list_image(content_params)
                when PRODUCT_LIST_PRICE
                  content_for_product_list_price(content_params)
+               when PRODUCT_LIST_INVENTORY
+                 content_for_product_list_inventory(content_params)
                end
         query_params = {:feed_type => type}
         submit_to_mws(name, body, query_params)
@@ -93,6 +96,24 @@ module MWS
           end
         end.to_xml
       end
+
+      def content_for_product_list_inventory(opts={})
+        amazon_envelope_with_header do |xml|
+          xml.MessageType "Inventory"
+          xml.PurgeAndReplace opts[:purge_and_replace]
+          opts[:entries].each do |entry|
+            xml.Message {
+              xml.MessageID entry[:message_id]
+              xml.OperationType entry[:operation_type]
+              xml.Inventory {
+                xml.SKU entry[:isbn]
+                xml.Quantity entry[:quantity]
+              }
+            }
+          end
+        end.to_xml
+      end
+
 
       def content_for_product_list_image(opts={})
         amazon_envelope_with_header do |xml|
