@@ -412,14 +412,12 @@ describe MWS::API::Feed do
             body = hash_list[:body]
             body_doc = Nokogiri.parse(body)
 
-            body_doc.css('AmazonEnvelope Message Inventory SKU').should_not be_empty
             body_doc.css('AmazonEnvelope Message MessageID')[0].text.should == "1"
             body_doc.css('AmazonEnvelope Message MessageID')[1].text.should == "2"
             body_doc.css('AmazonEnvelope Message Inventory SKU')[0].text.should == "9781320717869"
             body_doc.css('AmazonEnvelope Message Inventory SKU')[1].text.should == "9781320717870"
             body_doc.css('AmazonEnvelope MessageType').length.should == 1
             body_doc.css('AmazonEnvelope PurgeAndReplace').text.should == "false"
-            body_doc.css('AmazonEnvelope Message Inventory').should_not be_empty
             body_doc.css('AmazonEnvelope Message Inventory Quantity')[0].text.should == "100"
             body_doc.css('AmazonEnvelope Message Inventory Quantity')[1].text.should == "200"
           end
