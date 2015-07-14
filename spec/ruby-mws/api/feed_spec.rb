@@ -166,6 +166,24 @@ describe MWS::API::Feed do
       }
     }
 
+    let(:product_inventory_hash_first) {
+      {
+        :message_id => 1,
+        :operation_type => 'Update',
+        :isbn => '9781320717869',
+        :currency => 'USD',
+        :quantity => '100'
+      }
+    }
+
+    let(:product_inventory_hash_second) {
+      {
+        :message_id => 2,
+        :operation_type => 'Update',
+        :isbn => '9781320717870',
+        :quantity => '200'
+      }
+    }
 
     let(:product_price_hash_list) {
       {
@@ -180,6 +198,14 @@ describe MWS::API::Feed do
         :entries => [ product_image_hash_1, product_image_hash_2 ]
       }
     }
+
+    let(:product_inventory_hash_list) {
+      {
+        :purge_and_replace => false,
+        :entries => [ product_inventory_hash_first, product_inventory_hash_second ]
+      }
+    }
+
 
     describe "#feed_submission_result" do
 
@@ -369,6 +395,36 @@ describe MWS::API::Feed do
           response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST_PRICE, product_price_hash_list)
         end
       end
+
+      context "#product_inventory_data" do
+        it 'should be able to set the inventory'  do
+          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST_INVENTORY, product_inventory_hash_list)
+          response.feed_submission_info.should_not be_nil
+
+          info = response.feed_submission_info
+          info.feed_processing_status.should == "_SUBMITTED_"
+          info.feed_type.should == MWS::API::Feed::PRODUCT_LIST_INVENTORY
+        end
+
+        it "should create the correct body for inventory" do
+          MWS::API::Feed.should_receive(:post) do |uri, hash_list|
+            hash_list.should include(:body)
+            body = hash_list[:body]
+            body_doc = Nokogiri.parse(body)
+
+            body_doc.css('AmazonEnvelope Message MessageID')[0].text.should == "1"
+            body_doc.css('AmazonEnvelope Message MessageID')[1].text.should == "2"
+            body_doc.css('AmazonEnvelope Message Inventory SKU')[0].text.should == "9781320717869"
+            body_doc.css('AmazonEnvelope Message Inventory SKU')[1].text.should == "9781320717870"
+            body_doc.css('AmazonEnvelope MessageType').length.should == 1
+            body_doc.css('AmazonEnvelope PurgeAndReplace').text.should == "false"
+            body_doc.css('AmazonEnvelope Message Inventory Quantity')[0].text.should == "100"
+            body_doc.css('AmazonEnvelope Message Inventory Quantity')[1].text.should == "200"
+          end
+          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST_INVENTORY, product_inventory_hash_list)
+        end
+      end
+
 
       it 'should be able to ack the product' do
         response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST, product_hash_list)
