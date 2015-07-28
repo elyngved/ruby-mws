@@ -170,9 +170,9 @@ module MWS
                   }
                   xml.MSRP(:currency => entry_hash[:currency]){ xml.text(entry_hash[:standard_price]) }
                   xml.Manufacturer entry_hash[:manufacturer]
-                  entry_hash[:search_terms][:taggings].each do |search_term|
-                    xml.SearchTerms {xml.text(search_term[:tag_name])}
-                  end
+                    entry_hash[:search_terms][:taggings].each do |search_term|
+                      xml.SearchTerms {xml.text(search_term[:tag_name])}
+                    end if !entry_hash[:search_terms].nil?
                 }
                   xml.ProductData {
                     xml.Books {
