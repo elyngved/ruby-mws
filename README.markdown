@@ -1,13 +1,10 @@
-ruby-mws
-========
+# ruby-mws [DEPRECATED]
 
 by Erik Lyngved
 
 ruby-mws is a Ruby gem that wraps the Amazon Marketplace Web Service (MWS) API.
 
-## Read me first!!!!!!!!11
-
-I made this gem a few years ago for my own purposes with the intention of open sourcing it. It's not fully featured as I only implemented what I needed at the time. I've moved on to other projects and I am no longer maintaining this gem.
+I made this gem a few years ago for my own purposes with the intention of open sourcing it. It's not fully featured as I only implemented what I needed at the time. I've moved on to other projects and **I am no longer maintaining this gem.**
 
 Feel free to use this gem in any capacity and check out the Pull Requests others have submitted to introduce functionality for other endpoints. If you are still evaluating different MWS gems, you may want to check out [Peddler](https://github.com/hakanensari/peddler) which is currently being maintained and is more fully featured.
 
