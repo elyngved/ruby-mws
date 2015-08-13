@@ -7,6 +7,7 @@ module MWS
       ORDER_ACK = '_POST_ORDER_ACKNOWLEDGEMENT_DATA_'
       SHIP_ACK = '_POST_ORDER_FULFILLMENT_DATA_'
       PRODUCT_LIST = '_POST_PRODUCT_DATA_'
+      PRODUCT_LIST_REMOVE = '_POST_PRODUCT_DATA_'
       PRODUCT_LIST_IMAGE = '_POST_PRODUCT_IMAGE_DATA_'
       PRODUCT_LIST_PRICE = '_POST_PRODUCT_PRICING_DATA_'
       PRODUCT_LIST_INVENTORY = '_POST_INVENTORY_AVAILABILITY_DATA_'
@@ -27,6 +28,8 @@ module MWS
                  content_for_ship_with(content_params)
                when PRODUCT_LIST
                  content_for_product_list(content_params)
+               when PRODUCT_LIST_REMOVE
+                 content_for_product_list_remove(content_params)
                when PRODUCT_LIST_IMAGE
                  content_for_product_list_image(content_params)
                when PRODUCT_LIST_PRICE
@@ -132,6 +135,23 @@ module MWS
           end
         end.to_xml
       end
+
+      def content_for_product_list_remove(opts={})
+        amazon_envelope_with_header do |xml|
+          xml.MessageType "Product"
+          xml.PurgeAndReplace opts[:purge_and_replace]
+          opts[:entries].each do |entry_hash|
+            xml.Message {
+              xml.MessageID entry_hash[:message_id]
+              xml.OperationType entry_hash[:operation_type]
+              xml.Product {
+                xml.SKU entry_hash[:isbn]
+              }
+            }
+          end
+        end.to_xml
+      end
+
 
       # Returns a string containing the order acknowledgement xml
       #
