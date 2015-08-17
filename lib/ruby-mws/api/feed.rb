@@ -10,6 +10,7 @@ module MWS
       PRODUCT_LIST_IMAGE = '_POST_PRODUCT_IMAGE_DATA_'
       PRODUCT_LIST_PRICE = '_POST_PRODUCT_PRICING_DATA_'
       PRODUCT_LIST_INVENTORY = '_POST_INVENTORY_AVAILABILITY_DATA_'
+      PRODUCT_FLAT_FILE_INVLOADER = '_POST_FLAT_FILE_INVLOADER_DATA_'
 
       # POSTs a request to the submit feed action of the feeds api
       #
@@ -33,6 +34,8 @@ module MWS
                  content_for_product_list_price(content_params)
                when PRODUCT_LIST_INVENTORY
                  content_for_product_list_inventory(content_params)
+               when PRODUCT_FLAT_FILE_INVLOADER
+                 content_for_product_flat_file_invloader(content_params)
                end
         query_params = {:feed_type => type}
         submit_to_mws(name, body, query_params)
@@ -131,6 +134,17 @@ module MWS
             }
           end
         end.to_xml
+      end
+
+      def content_for_product_flat_file_invloader(opts={})
+        CSV.generate({:col_sep=>"\t"}) do |csv|
+          csv << ['TemplateType=InventoryLoader', 'Version=2014.0415']
+          csv << ['SKU', 'Will Ship Internationally']
+          csv << ['item_sku', 'will_ship_internationally']
+          opts[:entries].each do |entry|
+              csv << [entry[:isbn], 'y']
+          end
+        end
       end
 
       # Returns a string containing the order acknowledgement xml

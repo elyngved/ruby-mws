@@ -425,6 +425,24 @@ describe MWS::API::Feed do
         end
       end
 
+      context "#product_flat_file_invloader" do
+        it 'should be able to set the inventory'  do
+          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_FLAT_FILE_INVLOADER, product_price_hash_list)
+          response.feed_submission_info.should_not be_nil
+          info = response.feed_submission_info
+          info.feed_processing_status.should == "_SUBMITTED_"
+          info.feed_type.should == MWS::API::Feed::PRODUCT_FLAT_FILE_INVLOADER
+        end
+
+        it "should create the correct body for inventory" do
+          MWS::API::Feed.should_receive(:post) do |uri, hash_list|
+            hash_list.should include(:body)
+            body = hash_list[:body]
+            body.should == "TemplateType=InventoryLoader\tVersion=2014.0415\nSKU\tWill Ship Internationally\nitem_sku\twill_ship_internationally\n9781320717869\ty\n9781320717870\ty\n"
+          end
+          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_FLAT_FILE_INVLOADER, product_price_hash_list)
+        end
+      end
 
       it 'should be able to ack the product' do
         response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST, product_hash_list)
