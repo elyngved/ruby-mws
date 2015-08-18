@@ -441,12 +441,12 @@ describe MWS::API::Feed do
 
       context "#product_list_remove" do
         it 'should be able to set the inventory'  do
-          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST_REMOVE, product_list_remove_hash_list)
+          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST, product_list_remove_hash_list)
           response.feed_submission_info.should_not be_nil
 
           info = response.feed_submission_info
           info.feed_processing_status.should == "_SUBMITTED_"
-          info.feed_type.should == MWS::API::Feed::PRODUCT_LIST_REMOVE
+          info.feed_type.should == MWS::API::Feed::PRODUCT_LIST
         end
 
         it "should create the correct body for product remove" do
@@ -461,7 +461,7 @@ describe MWS::API::Feed do
             body_doc.css('AmazonEnvelope Message OperationType').text.should == "Delete"
             body_doc.css('AmazonEnvelope PurgeAndReplace').text.should == "false"
           end
-          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST_REMOVE, product_list_remove_hash_list)
+          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST, product_list_remove_hash_list)
         end
       end
 
