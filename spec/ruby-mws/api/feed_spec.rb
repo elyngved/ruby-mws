@@ -185,6 +185,20 @@ describe MWS::API::Feed do
       }
     }
 
+    let(:product_list_remove_hash) {
+      {
+        :message_id => 1,
+        :operation_type => 'Delete',
+        :isbn => '9781320717869',
+      }
+    }
+    let(:product_list_remove_hash_list) {
+      {
+        :purge_and_replace => false,
+        :entries => [ product_list_remove_hash ]
+      }
+    }
+
     let(:product_price_hash_list) {
       {
         :purge_and_replace => false,
@@ -425,6 +439,50 @@ describe MWS::API::Feed do
         end
       end
 
+      context "#product_list_remove" do
+        it 'should be able to set the inventory'  do
+          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST_REMOVE, product_list_remove_hash_list)
+          response.feed_submission_info.should_not be_nil
+
+          info = response.feed_submission_info
+          info.feed_processing_status.should == "_SUBMITTED_"
+          info.feed_type.should == MWS::API::Feed::PRODUCT_LIST_REMOVE
+        end
+
+        it "should create the correct body for product remove" do
+          MWS::API::Feed.should_receive(:post) do |uri, hash_list|
+            hash_list.should include(:body)
+            body = hash_list[:body]
+            body_doc = Nokogiri.parse(body)
+
+            body_doc.css('AmazonEnvelope Message MessageID').text.should == "1"
+            body_doc.css('AmazonEnvelope Message Product SKU').text.should == "9781320717869"
+            body_doc.css('AmazonEnvelope MessageType').length.should == 1
+            body_doc.css('AmazonEnvelope Message OperationType').text.should == "Delete"
+            body_doc.css('AmazonEnvelope PurgeAndReplace').text.should == "false"
+          end
+          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST_REMOVE, product_list_remove_hash_list)
+        end
+      end
+
+      context "#product_flat_file_invloader" do
+        it 'should be able to set the inventory'  do
+          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_FLAT_FILE_INVLOADER, product_price_hash_list)
+          response.feed_submission_info.should_not be_nil
+          info = response.feed_submission_info
+          info.feed_processing_status.should == "_SUBMITTED_"
+          info.feed_type.should == MWS::API::Feed::PRODUCT_FLAT_FILE_INVLOADER
+        end
+
+        it "should create the correct body for inventory" do
+          MWS::API::Feed.should_receive(:post) do |uri, hash_list|
+            hash_list.should include(:body)
+            body = hash_list[:body]
+            body.should == "TemplateType=InventoryLoader\tVersion=2014.0415\nSKU\tWill Ship Internationally\nitem_sku\twill_ship_internationally\n9781320717869\ty\n9781320717870\ty\n"
+          end
+          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_FLAT_FILE_INVLOADER, product_price_hash_list)
+        end
+      end
 
       it 'should be able to ack the product' do
         response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST, product_hash_list)
