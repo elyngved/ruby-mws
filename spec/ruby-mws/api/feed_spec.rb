@@ -442,7 +442,6 @@ describe MWS::API::Feed do
       context "#product_list_remove" do
         it 'should be able to set the inventory'  do
           response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST, product_list_remove_hash_list)
-          response.feed_submission_info.should_not be_nil
 
           info = response.feed_submission_info
           info.feed_processing_status.should == "_SUBMITTED_"
