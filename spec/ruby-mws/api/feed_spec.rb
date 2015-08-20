@@ -185,6 +185,20 @@ describe MWS::API::Feed do
       }
     }
 
+    let(:product_list_remove_hash) {
+      {
+        :message_id => 1,
+        :operation_type => 'Delete',
+        :isbn => '9781320717869',
+      }
+    }
+    let(:product_list_remove_hash_list) {
+      {
+        :purge_and_replace => false,
+        :entries => [ product_list_remove_hash ]
+      }
+    }
+
     let(:product_price_hash_list) {
       {
         :purge_and_replace => false,
@@ -422,6 +436,31 @@ describe MWS::API::Feed do
             body_doc.css('AmazonEnvelope Message Inventory Quantity')[1].text.should == "200"
           end
           response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST_INVENTORY, product_inventory_hash_list)
+        end
+      end
+
+      context "#product_list_remove" do
+        it 'should be able to set the inventory'  do
+          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST, product_list_remove_hash_list)
+
+          info = response.feed_submission_info
+          info.feed_processing_status.should == "_SUBMITTED_"
+          info.feed_type.should == MWS::API::Feed::PRODUCT_LIST
+        end
+
+        it "should create the correct body for product remove" do
+          MWS::API::Feed.should_receive(:post) do |uri, hash_list|
+            hash_list.should include(:body)
+            body = hash_list[:body]
+            body_doc = Nokogiri.parse(body)
+
+            body_doc.css('AmazonEnvelope Message MessageID').text.should == "1"
+            body_doc.css('AmazonEnvelope Message Product SKU').text.should == "9781320717869"
+            body_doc.css('AmazonEnvelope MessageType').length.should == 1
+            body_doc.css('AmazonEnvelope Message OperationType').text.should == "Delete"
+            body_doc.css('AmazonEnvelope PurgeAndReplace').text.should == "false"
+          end
+          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST, product_list_remove_hash_list)
         end
       end
 

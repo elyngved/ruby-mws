@@ -117,7 +117,6 @@ module MWS
         end.to_xml
       end
 
-
       def content_for_product_list_image(opts={})
         amazon_envelope_with_header do |xml|
           xml.MessageType "ProductImage"
@@ -168,37 +167,39 @@ module MWS
                   xml.Type  "ISBN"
                   xml.Value entry_hash[:isbn]
                 }
-                xml.Condition {
-                  xml.ConditionType entry_hash[:item_condition_type]
-                }
-                xml.ItemPackageQuantity entry_hash[:item_package_quantity]
-                xml.NumberOfItems entry_hash[:number_of_items]
-                xml.DescriptionData {
-                  xml.Title entry_hash[:title]
-                  xml.Brand entry_hash[:brand]
-                  xml.Description entry_hash[:description]
-                  xml.PackageDimensions {
-                    xml.Length(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_length]) }
-                    xml.Width(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_width]) }
-                    xml.Height(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_height]) }
+                if entry_hash[:operation_type] != "Delete"
+                  xml.Condition {
+                    xml.ConditionType entry_hash[:item_condition_type]
                   }
-                  xml.MSRP(:currency => entry_hash[:currency]){ xml.text(entry_hash[:standard_price]) }
-                  xml.Manufacturer entry_hash[:manufacturer]
-                    entry_hash[:search_terms][:taggings].each do |search_term|
-                      xml.SearchTerms {xml.text(search_term[:tag_name])}
-                    end if !entry_hash[:search_terms].nil?
-                }
-                  xml.ProductData {
-                    xml.Books {
-                      xml.ProductType {
-                        xml.BooksMisc {
-                          xml.Author entry_hash[:authors]
-                          xml.Binding entry_hash[:binding]
-                          xml.PublicationDate entry_hash[:publication_date]
+                  xml.ItemPackageQuantity entry_hash[:item_package_quantity]
+                  xml.NumberOfItems entry_hash[:number_of_items]
+                  xml.DescriptionData {
+                    xml.Title entry_hash[:title]
+                    xml.Brand entry_hash[:brand]
+                    xml.Description entry_hash[:description]
+                    xml.PackageDimensions {
+                      xml.Length(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_length]) }
+                      xml.Width(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_width]) }
+                      xml.Height(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_height]) }
+                    }
+                    xml.MSRP(:currency => entry_hash[:currency]){ xml.text(entry_hash[:standard_price]) }
+                    xml.Manufacturer entry_hash[:manufacturer]
+                      entry_hash[:search_terms][:taggings].each do |search_term|
+                        xml.SearchTerms {xml.text(search_term[:tag_name])}
+                      end if !entry_hash[:search_terms].nil?
+                  }
+                    xml.ProductData {
+                      xml.Books {
+                        xml.ProductType {
+                          xml.BooksMisc {
+                            xml.Author entry_hash[:authors]
+                            xml.Binding entry_hash[:binding]
+                            xml.PublicationDate entry_hash[:publication_date]
+                          }
                         }
                       }
-                    }
-                }
+                  }
+                end
               }
             }
           end
