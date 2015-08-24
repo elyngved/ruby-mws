@@ -191,9 +191,7 @@ module MWS
           }
           xml.MSRP(:currency => entry_hash[:currency]){ xml.text(entry_hash[:standard_price]) }
           xml.Manufacturer entry_hash[:manufacturer]
-            entry_hash[:search_terms][:taggings].each do |search_term|
-              xml.SearchTerms {xml.text(search_term[:tag_name])}
-            end if !entry_hash[:search_terms].nil?
+          add_search_terms(xml, entry_hash) unless entry_hash[:search_terms].nil?
         }
         xml.ProductData {
           xml.Books {
@@ -208,6 +206,12 @@ module MWS
         }
       end
 
+
+      def add_search_terms(xml, entry_hash)
+        entry_hash[:search_terms][:taggings].each do |search_term|
+          xml.SearchTerms {xml.text(search_term[:tag_name])}
+        end
+      end
 
       # @option opts [String] :status_code (optional) Ack status code. Defaults to 'Success'
       # @option opts [String] :merchant_order_item_id (optional) Internal order line item id
