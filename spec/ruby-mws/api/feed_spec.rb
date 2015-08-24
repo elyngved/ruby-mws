@@ -462,6 +462,18 @@ describe MWS::API::Feed do
           end
           response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST, product_list_remove_hash_list)
         end
+
+        it "should not have additional data" do
+          MWS::API::Feed.should_receive(:post) do |uri, hash_list|
+            hash_list.should include(:body)
+            body = hash_list[:body]
+            body_doc = Nokogiri.parse(body)
+
+            body_doc.css('AmazonEnvelope Message Product Condition').should be_empty
+            body_doc.css('AmazonEnvelope Message Product ProductData').should be_empty
+          end
+          response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST, product_list_remove_hash_list)
+        end
       end
 
       context "#product_flat_file_invloader" do

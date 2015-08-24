@@ -167,9 +167,7 @@ module MWS
                   xml.Type  "ISBN"
                   xml.Value entry_hash[:isbn]
                 }
-                if entry_hash[:operation_type] != "Delete"
-                  get_addition_data(xml, entry_hash)
-                end
+                get_addition_data(xml, entry_hash) if entry_hash[:operation_type] != "Delete"
               }
             }
           end
