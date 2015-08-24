@@ -168,43 +168,48 @@ module MWS
                   xml.Value entry_hash[:isbn]
                 }
                 if entry_hash[:operation_type] != "Delete"
-                  xml.Condition {
-                    xml.ConditionType entry_hash[:item_condition_type]
-                  }
-                  xml.ItemPackageQuantity entry_hash[:item_package_quantity]
-                  xml.NumberOfItems entry_hash[:number_of_items]
-                  xml.DescriptionData {
-                    xml.Title entry_hash[:title]
-                    xml.Brand entry_hash[:brand]
-                    xml.Description entry_hash[:description]
-                    xml.PackageDimensions {
-                      xml.Length(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_length]) }
-                      xml.Width(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_width]) }
-                      xml.Height(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_height]) }
-                    }
-                    xml.MSRP(:currency => entry_hash[:currency]){ xml.text(entry_hash[:standard_price]) }
-                    xml.Manufacturer entry_hash[:manufacturer]
-                      entry_hash[:search_terms][:taggings].each do |search_term|
-                        xml.SearchTerms {xml.text(search_term[:tag_name])}
-                      end if !entry_hash[:search_terms].nil?
-                  }
-                    xml.ProductData {
-                      xml.Books {
-                        xml.ProductType {
-                          xml.BooksMisc {
-                            xml.Author entry_hash[:authors]
-                            xml.Binding entry_hash[:binding]
-                            xml.PublicationDate entry_hash[:publication_date]
-                          }
-                        }
-                      }
-                  }
+                  get_addition_data(xml, entry_hash)
                 end
               }
             }
           end
         end.to_xml
       end
+
+      def get_addition_data(xml, entry_hash)
+        xml.Condition {
+          xml.ConditionType entry_hash[:item_condition_type]
+        }
+        xml.ItemPackageQuantity entry_hash[:item_package_quantity]
+        xml.NumberOfItems entry_hash[:number_of_items]
+        xml.DescriptionData {
+          xml.Title entry_hash[:title]
+          xml.Brand entry_hash[:brand]
+          xml.Description entry_hash[:description]
+          xml.PackageDimensions {
+            xml.Length(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_length]) }
+            xml.Width(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_width]) }
+            xml.Height(:unitOfMeasure => entry_hash[:unit_of_measure]) { xml.text(entry_hash[:package_height]) }
+          }
+          xml.MSRP(:currency => entry_hash[:currency]){ xml.text(entry_hash[:standard_price]) }
+          xml.Manufacturer entry_hash[:manufacturer]
+            entry_hash[:search_terms][:taggings].each do |search_term|
+              xml.SearchTerms {xml.text(search_term[:tag_name])}
+            end if !entry_hash[:search_terms].nil?
+        }
+        xml.ProductData {
+          xml.Books {
+            xml.ProductType {
+              xml.BooksMisc {
+                xml.Author entry_hash[:authors]
+                xml.Binding entry_hash[:binding]
+                xml.PublicationDate entry_hash[:publication_date]
+              }
+            }
+          }
+        }
+      end
+
 
       # @option opts [String] :status_code (optional) Ack status code. Defaults to 'Success'
       # @option opts [String] :merchant_order_item_id (optional) Internal order line item id
