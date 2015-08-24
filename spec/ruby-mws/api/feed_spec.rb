@@ -505,7 +505,6 @@ describe MWS::API::Feed do
           hash_list.should include(:body)
           body = hash_list[:body]
           body_doc = Nokogiri.parse(body)
-          pp body
           ids = body_doc.css('AmazonEnvelope Message Product SKU')
           ids.should_not be_empty
           ids[0].text.should == first_item_code
