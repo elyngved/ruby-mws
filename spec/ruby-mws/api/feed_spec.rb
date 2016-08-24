@@ -11,7 +11,8 @@ describe MWS::API::Feed do
     let(:first_order_id) {'105-8268075-6520231'}
     let(:second_order_id) {'105-8268075-6520232'}
     let(:order_ack_order_id){'105-1063273-7151427'}
-    let(:fulfillment_date){DateTime.now}
+    let(:orders_fulfillment_date) { DateTime.now }
+    let(:first_order_fulfillment) { Date.parse('2016-01-01') }
     let(:carrier_code){'UPS'}
     let(:shipping_method){'2nd Day'}
     let(:tracking_number){'123321123321'}
@@ -21,9 +22,10 @@ describe MWS::API::Feed do
     let(:fourth_item_code){'62918663121792'}
     let(:shipment_hash) {
       {
-        :fulfillment_date => fulfillment_date,
+        :fulfillment_date => orders_fulfillment_date,
         :orders => [ {
                        :amazon_order_id => first_order_id,
+                       :fulfillment_date => first_order_fulfillment,
                        :shipping_method => shipping_method,
                        :carrier_code => carrier_code,
                        :tracking_number => tracking_number,
@@ -328,7 +330,8 @@ describe MWS::API::Feed do
           body_doc.css('AmazonEnvelope MessageType').length.should == 1 # multiple types was causing problems
           body_doc.css('AmazonEnvelope Message OrderFulfillment').should_not be_empty
           body_doc.css('AmazonEnvelope Message OrderFulfillment AmazonOrderID').should_not be_empty
-          body_doc.css('AmazonEnvelope Message OrderFulfillment FulfillmentDate').first.text.should == fulfillment_date.to_s
+          body_doc.css('AmazonEnvelope Message OrderFulfillment FulfillmentDate').first.text.should == first_order_fulfillment.to_s
+          body_doc.css('AmazonEnvelope Message OrderFulfillment FulfillmentDate').last.text.should == orders_fulfillment_date.to_s
           body_doc.css('AmazonEnvelope Message OrderFulfillment FulfillmentData').should_not be_empty
           body_doc.css('AmazonEnvelope Message OrderFulfillment FulfillmentData CarrierCode').first.text.should == carrier_code
           body_doc.css('AmazonEnvelope Message OrderFulfillment FulfillmentData ShippingMethod').first.text.should == shipping_method
