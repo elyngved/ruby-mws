@@ -134,6 +134,4 @@ marketplace_id: '[marketplace id]'
 
 Then run `bundle exec rspec spec/`
 
-To use binding.pry in a spec, be sure to require it with `require 'pry'`.
-
-There's still work and research to be done on how to integrate our changes in with the author's. Because we're using different credentials than the author and there are hardcoded order ids in the specs we'll never have all the specs passing for all of us.
+There's still work and research to be done on how to integrate our changes in with the author's. Because we're using different credentials than the author and there are hardcodede order ids in the specs we'll never have all the specs passing for all of us.
