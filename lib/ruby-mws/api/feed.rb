@@ -236,7 +236,7 @@ module MWS
         end.to_xml
       end
 
-      # Returns a string containing the shipping achnowledgement xml
+      # Returns a string containing the shipping acknowledgement xml
       #
       # @param [Hash{Symbol => String,Array,DateTime}] opts contains:
       # @option opts [Array<Hash>] :orders order specifics including:
@@ -252,11 +252,12 @@ module MWS
       #     :amazon_order_item_code
       #     :quantity keys
       #   @option opts [String] :tracking_number (optional) shipper tracking number
-      #   @option opts [String] :fulfillment_date (optional) DateTime the order was fulfilled
-      #     defaults to the current time
+      #   @option opts [String] :fulfillment_date (optional) DateTime the orders were fulfilled
+      #     defaults to the current time but an individual order's fulfillment date is
+      #     sent in preference over either of the defaults
       #   @option opts [String] :merchant_order_item_id Internal order line item id
       def content_for_ship_with(opts={})
-        fulfillment_date = opts[:fulfillment_date] || DateTime.now
+        orders_fulfillment_date = opts[:fulfillment_date] || DateTime.now
 
         amazon_envelope_with_header do |xml|
           xml.MessageType "OrderFulfillment"
@@ -265,7 +266,7 @@ module MWS
               xml.MessageID order_hash[:message_id]
               xml.OrderFulfillment {
                 xml.AmazonOrderID order_hash[:amazon_order_id]
-                xml.FulfillmentDate fulfillment_date
+                xml.FulfillmentDate order_hash[:fulfillment_date] || orders_fulfillment_date
                 xml.FulfillmentData {
                   xml.CarrierCode order_hash[:carrier_code]
                   xml.ShippingMethod order_hash[:shipping_method]
