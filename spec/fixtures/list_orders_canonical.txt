@@ -1,4 +1,4 @@
 GET
 mws.amazonservices.com
-/Orders/2011-01-01
-AWSAccessKeyId=access&Action=ListOrders&LastUpdatedAfter=2012-01-13T15%3A48%3A55-05%3A00&MarketplaceId.Id.1=ATVPDKIKX0DER&SellerId=A27WNMSA8OPBXY&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2012-01-14T15%3A48%3A55-05%3A00&Version=2011-01-01
+/Orders/2013-09-01
+AWSAccessKeyId=access&Action=ListOrders&LastUpdatedAfter=2012-01-13T15%3A48%3A55-05%3A00&MarketplaceId.Id.1=ATVPDKIKX0DER&SellerId=A27WNMSA8OPBXY&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2012-01-14T15%3A48%3A55-05%3A00&Version=2013-09-01

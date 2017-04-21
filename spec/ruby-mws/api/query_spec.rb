@@ -10,14 +10,14 @@ describe MWS::API::Query do
     it "should assemble the canonical query" do
       @query.canonical.should == %Q{GET
 mws.amazonservices.com
-/Orders/2011-01-01
-AWSAccessKeyId=#{default_params[:aws_access_key_id]}&Action=ListOrders&LastUpdatedAfter=2012-01-13T15%3A48%3A55-05%3A00&MarketplaceId.Id.1=#{default_params[:marketplace_id]}&SellerId=#{default_params[:seller_id]}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2012-01-14T15%3A48%3A55-05%3A00&Version=2011-01-01}
+/Orders/2013-09-01
+AWSAccessKeyId=#{default_params[:aws_access_key_id]}&Action=ListOrders&LastUpdatedAfter=2012-01-13T15%3A48%3A55-05%3A00&MarketplaceId.Id.1=#{default_params[:marketplace_id]}&SellerId=#{default_params[:seller_id]}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2012-01-14T15%3A48%3A55-05%3A00&Version=2013-09-01}
     end
   end
 
   context ".request_uri" do
     it "should assemble the request uri" do
-      @query.request_uri.should == "https://mws.amazonservices.com/Orders/2011-01-01?AWSAccessKeyId=#{default_params[:aws_access_key_id]}&Action=ListOrders&LastUpdatedAfter=2012-01-13T15%3A48%3A55-05%3A00&MarketplaceId.Id.1=#{default_params[:marketplace_id]}&SellerId=#{default_params[:seller_id]}&Signature=SIGNATURE&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2012-01-14T15%3A48%3A55-05%3A00&Version=2011-01-01"
+      @query.request_uri.should == "https://mws.amazonservices.com/Orders/2013-09-01?AWSAccessKeyId=#{default_params[:aws_access_key_id]}&Action=ListOrders&LastUpdatedAfter=2012-01-13T15%3A48%3A55-05%3A00&MarketplaceId.Id.1=#{default_params[:marketplace_id]}&SellerId=#{default_params[:seller_id]}&Signature=SIGNATURE&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2012-01-14T15%3A48%3A55-05%3A00&Version=2013-09-01"
     end
   end
 
@@ -37,8 +37,8 @@ AWSAccessKeyId=#{default_params[:aws_access_key_id]}&Action=ListOrders&LastUpdat
     params = {
       :last_updated_after => "2012-01-13T15:48:55-05:00",
       :verb               => :get,
-      :uri                => "/Orders/2011-01-01",
-      :version            => "2011-01-01",
+      :uri                => "/Orders/2013-09-01",
+      :version            => "2013-09-01",
       :host               => "mws.amazonservices.com",
       :action             => "ListOrders",
       :signature_method   => "HmacSHA256",

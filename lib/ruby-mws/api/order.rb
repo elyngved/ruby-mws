@@ -4,8 +4,8 @@ module MWS
     class Order < Base
       def_request [:list_orders, :list_orders_by_next_token],
         :verb => :get,
-        :uri => '/Orders/2011-01-01',
-        :version => '2011-01-01',
+        :uri => '/Orders/2013-09-01',
+        :version => '2013-09-01',
         :lists => {
           :order_status => "OrderStatus.Status",
           :marketplace_id => "MarketplaceId.Id"
@@ -17,8 +17,8 @@ module MWS
 
       def_request [:list_order_items, :list_order_items_by_next_token],
         :verb => :get,
-        :uri => '/Orders/2011-01-01',
-        :version => '2011-01-01',
+        :uri => '/Orders/2013-09-01',
+        :version => '2013-09-01',
         :lists => {
           :marketplace_id => "MarketplaceId.Id"
         },
@@ -28,8 +28,8 @@ module MWS
 
       def_request :get_order,
         :verb => :get,
-        :uri => '/Orders/2011-01-01',
-        :version => '2011-01-01',
+        :uri => '/Orders/2013-09-01',
+        :version => '2013-09-01',
         :lists => {
           :amazon_order_id => "AmazonOrderId.Id",
           :marketplace_id => "MarketplaceId.Id"
