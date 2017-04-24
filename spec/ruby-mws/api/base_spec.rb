@@ -5,8 +5,8 @@ describe MWS::API::Base do
     def self.test_params
       {
         :verb    => :get,
-        :uri     => '/FakeApi/2011-01-01',
-        :version => '2011-01-01'
+        :uri     => '/FakeApi/2013-09-01',
+        :version => '2013-09-01'
       }
     end
 
