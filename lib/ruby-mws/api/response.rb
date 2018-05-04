@@ -10,7 +10,7 @@ module MWS
         if !rash.keys.nil? && rash.keys.first == "amazon_envelope"
           rash
         else
-          raise BadResponseError, "received non-matching response type #{rash.keys}" if rash["#{name}_response"].nil? 
+          raise BadResponseError, "received non-matching response type #{rash.keys} code: #{rash.try(:error_response).try(:error).try(:code)} message: #{rash.try(:error_response).try(:error).try(:message)}" if rash["#{name}_response"].nil? 
           rash = rash["#{name}_response"]
 
           if rash = rash["#{name}_result"]
