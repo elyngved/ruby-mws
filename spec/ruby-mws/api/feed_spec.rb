@@ -174,7 +174,8 @@ describe MWS::API::Feed do
         :operation_type => 'Update',
         :isbn => '9781320717869',
         :currency => 'USD',
-        :quantity => '100'
+        :quantity => '100',
+        :fulfillment_latency => '5'
       }
     }
 
@@ -183,7 +184,8 @@ describe MWS::API::Feed do
         :message_id => 2,
         :operation_type => 'Update',
         :isbn => '9781320717870',
-        :quantity => '200'
+        :quantity => '200',
+        :fulfillment_latency => '5'
       }
     }
 
@@ -434,6 +436,8 @@ describe MWS::API::Feed do
             body_doc.css('AmazonEnvelope PurgeAndReplace').text.should == "false"
             body_doc.css('AmazonEnvelope Message Inventory Quantity')[0].text.should == "100"
             body_doc.css('AmazonEnvelope Message Inventory Quantity')[1].text.should == "200"
+            body_doc.css('AmazonEnvelope Message Inventory FulfillmentLatency')[0].text.should == "5"
+            body_doc.css('AmazonEnvelope Message Inventory FulfillmentLatency')[1].text.should == "5"
           end
           response = mws.feeds.submit_feed(MWS::API::Feed::PRODUCT_LIST_INVENTORY, product_inventory_hash_list)
         end
