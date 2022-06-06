@@ -111,7 +111,7 @@ module MWS
               xml.Inventory {
                 xml.SKU entry[:isbn]
                 xml.Quantity entry[:quantity]
-                xml.FulfillmentLatency entry[:fulfillment_latency]
+                xml.FulfillmentLatency entry[:fulfillment_latency] || 5
               }
             }
           end
