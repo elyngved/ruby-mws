@@ -197,7 +197,7 @@ module MWS
         xml.ProductData {
           xml.Books {
             xml.ProductType {
-              xml.AbisBook {
+              xml.BooksMisc {
                 xml.Author entry_hash[:authors]
                 xml.Binding entry_hash[:binding]
                 xml.PublicationDate entry_hash[:publication_date]
